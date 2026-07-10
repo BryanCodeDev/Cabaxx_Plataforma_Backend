@@ -1,0 +1,21 @@
+module.exports = {
+  tableName: 'products',
+  columns: {
+    id: 'id',
+    artistId: 'artist_id',
+    categoryId: 'category_id',
+    name: 'name',
+    slug: 'slug',
+    description: 'description',
+    price: 'price',
+    compareAtPrice: 'compare_at_price',
+    currency: 'currency',
+    sku: 'sku',
+    stockQuantity: 'stock_quantity',
+    type: 'type',
+    coverUrl: 'cover_url',
+    status: 'status',
+    weightGrams: 'weight_grams',
+    deletedAt: 'deleted_at',
+  },
+};

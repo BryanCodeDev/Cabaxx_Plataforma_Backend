@@ -1,0 +1,49 @@
+const express = require('express');
+const router = express.Router();
+
+const authRoutes = require('./authRoutes');
+const artistsRoutes = require('./artists.routes');
+const songsRoutes = require('./songs.routes');
+const albumsRoutes = require('./albums.routes');
+const eventsRoutes = require('./events.routes');
+const postsRoutes = require('./posts.routes');
+const galleryRoutes = require('./gallery.routes');
+const newsletterRoutes = require('./newsletter.routes');
+const storeRoutes = require('./store.routes');
+const orderRoutes = require('./order.routes');
+const paymentRoutes = require('./paymentRoutes');
+const dashboardRoutes = require('./dashboardRoutes');
+const notificationRoutes = require('./notificationRoutes');
+const settingsRoutes = require('./settingsRoutes');
+const adminRoutes = require('./adminRoutes');
+const videoRoutes = require('./videoRoutes');
+const seoRoutes = require('./seo.routes');
+const communityRoutes = require('./community.routes');
+const { resolveArtist } = require('../../middlewares/tenantResolver');
+
+router.use(resolveArtist);
+
+router.use('/auth', authRoutes);
+router.use('/artists', artistsRoutes);
+router.use('/artists/:artist_slug/songs', songsRoutes);
+router.use('/artists/:artist_slug/albums', albumsRoutes);
+router.use('/artists/:artist_slug/events', eventsRoutes.artistEvents);
+router.use('/artists/:artist_slug/posts', postsRoutes);
+router.use('/artists/:artist_slug/gallery', galleryRoutes);
+router.use('/artists/:artist_slug/videos', videoRoutes);
+router.use('/artists/:artist_slug/newsletter', newsletterRoutes.artistNewsletter);
+router.use('/artists/:artist_slug', storeRoutes);
+router.use('/tickets', eventsRoutes.tickets);
+router.use('/newsletter', newsletterRoutes.router);
+router.use('/checkout', orderRoutes.router);
+router.use('/my/orders', orderRoutes.myOrdersRouter);
+router.use('/artists/:artist_slug', orderRoutes.artistOrders);
+router.use('/payments', paymentRoutes);
+router.use('/dashboard', dashboardRoutes);
+router.use('/notifications', notificationRoutes);
+router.use('/settings', settingsRoutes);
+router.use('/admin', adminRoutes);
+router.use('/seo/:artist_slug', seoRoutes);
+router.use('/community', communityRoutes);
+
+module.exports = router;

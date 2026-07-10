@@ -1,0 +1,21 @@
+module.exports = {
+  tableName: 'songs',
+  columns: {
+    id: 'id',
+    artistId: 'artist_id',
+    albumId: 'album_id',
+    title: 'title',
+    slug: 'slug',
+    durationSeconds: 'duration_seconds',
+    lyrics: 'lyrics',
+    description: 'description',
+    coverUrl: 'cover_url',
+    audioUrl: 'audio_url',
+    releaseDate: 'release_date',
+    status: 'status',
+    playsCount: 'plays_count',
+    likesCount: 'likes_count',
+    isExplicit: 'is_explicit',
+    deletedAt: 'deleted_at',
+  },
+};

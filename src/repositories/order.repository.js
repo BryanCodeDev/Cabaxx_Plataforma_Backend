@@ -67,4 +67,15 @@ async function updateStatus(id, status, artistId = null) {
   return findById(id);
 }
 
-module.exports = { createOrder, findById, findOrdersByUser, findOrdersByArtist, updateStatus };
+async function softDelete(id, artistId = null) {
+  let sql = `UPDATE ${OrderModel.tableName} SET deleted_at = NOW() WHERE id = ?`;
+  const params = [id];
+  if (artistId) {
+    sql += ' AND artist_id = ?';
+    params.push(artistId);
+  }
+  const [result] = await db.query(sql, params);
+  return result.affectedRows > 0;
+}
+
+module.exports = { createOrder, findById, findOrdersByUser, findOrdersByArtist, updateStatus, softDelete };

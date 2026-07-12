@@ -27,6 +27,12 @@ async function listSubscribers(artistId, filters = {}) {
   return newsletterRepository.findAll(artistId, filters);
 }
 
+async function deleteSubscriber(id, artistId) {
+  const ok = await newsletterRepository.removeSubscriber(id, artistId);
+  if (!ok) throw new NotFoundError('Subscriber not found');
+  return true;
+}
+
 async function sendCampaign(artistId, campaignId) {
   const [campaignRow] = await dbCampaign(campaignId);
   if (!campaignRow) throw new NotFoundError('Campaign not found');
@@ -72,4 +78,4 @@ async function dbCampaigns(artistId) {
   return db.query('SELECT * FROM newsletter_campaigns WHERE artist_id = ? ORDER BY created_at DESC', [artistId]);
 }
 
-module.exports = { subscribe, unsubscribe, listSubscribers, sendCampaign, createCampaign, listCampaigns };
+module.exports = { subscribe, unsubscribe, listSubscribers, deleteSubscriber, sendCampaign, createCampaign, listCampaigns };

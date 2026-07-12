@@ -15,6 +15,7 @@ artistEvents.get('/upcoming', eventsController.upcoming);
 artistEvents.get('/:slug', eventsValidation.getBySlug, validateMiddleware, eventsController.getBySlug);
 artistEvents.post('/', authMiddleware, requireArtistAdmin, eventsValidation.create, validateMiddleware, eventsController.create);
 artistEvents.put('/:id', authMiddleware, requireArtistAdmin, eventsValidation.create, validateMiddleware, eventsController.update);
+artistEvents.delete('/:id', authMiddleware, requireArtistAdmin, eventsController.remove);
 
 // Tickets
 const tickets = express.Router();

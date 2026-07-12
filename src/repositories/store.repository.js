@@ -131,6 +131,68 @@ async function incrementCouponUses(conn, couponId) {
   await conn.query(`UPDATE ${CouponModel.tableName} SET uses_count = uses_count + 1 WHERE id = ?`, [couponId]);
 }
 
+async function softDelete(id, artistId) {
+  const [result] = await db.query(
+    `UPDATE ${ProductModel.tableName} SET deleted_at = NOW() WHERE id = ? AND artist_id = ? AND deleted_at IS NULL`,
+    [id, artistId],
+  );
+  return result.affectedRows > 0;
+}
+
+async function updateCategory(id, data, artistId) {
+  const keys = Object.keys(data).filter((k) => k !== 'id');
+  if (!keys.length) return db.query(`SELECT * FROM ${CategoryModel.tableName} WHERE id = ?`, [id]).then(([r]) => r);
+  const assignments = keys.map((k) => `${k} = ?`).join(', ');
+  await db.query(`UPDATE ${CategoryModel.tableName} SET ${assignments} WHERE id = ? AND artist_id = ?`, [...keys.map((k) => data[k]), id, artistId]);
+  const [row] = await db.query(`SELECT * FROM ${CategoryModel.tableName} WHERE id = ?`, [id]);
+  return row;
+}
+
+async function deleteCategory(id, artistId) {
+  const [result] = await db.query(`DELETE FROM ${CategoryModel.tableName} WHERE id = ? AND artist_id = ?`, [id, artistId]);
+  return result.affectedRows > 0;
+}
+
+async function listCoupons(artistId, { status, search } = {}) {
+  const clauses = ['artist_id = ?'];
+  const params = [artistId];
+  if (status) {
+    clauses.push('status = ?');
+    params.push(status);
+  }
+  if (search) {
+    clauses.push('code LIKE ?');
+    params.push(`%${search}%`);
+  }
+  const rows = await db.query(
+    `SELECT * FROM ${CouponModel.tableName} WHERE ${clauses.join(' AND ')} ORDER BY created_at DESC`,
+    params,
+  );
+  return { rows, total: rows.length };
+}
+
+async function createCoupon(data) {
+  const keys = Object.keys(data);
+  const placeholders = keys.map(() => '?').join(', ');
+  const [result] = await db.query(`INSERT INTO ${CouponModel.tableName} (${keys.join(', ')}) VALUES (${placeholders})`, keys.map((k) => data[k]));
+  const [row] = await db.query(`SELECT * FROM ${CouponModel.tableName} WHERE id = ?`, [result.insertId]);
+  return row;
+}
+
+async function updateCoupon(id, data, artistId) {
+  const keys = Object.keys(data).filter((k) => k !== 'id');
+  if (!keys.length) return db.query(`SELECT * FROM ${CouponModel.tableName} WHERE id = ?`, [id]).then(([r]) => r);
+  const assignments = keys.map((k) => `${k} = ?`).join(', ');
+  await db.query(`UPDATE ${CouponModel.tableName} SET ${assignments} WHERE id = ? AND artist_id = ?`, [...keys.map((k) => data[k]), id, artistId]);
+  const [row] = await db.query(`SELECT * FROM ${CouponModel.tableName} WHERE id = ?`, [id]);
+  return row;
+}
+
+async function deleteCoupon(id, artistId) {
+  const [result] = await db.query(`DELETE FROM ${CouponModel.tableName} WHERE id = ? AND artist_id = ?`, [id, artistId]);
+  return result.affectedRows > 0;
+}
+
 module.exports = {
   findAll,
   findBySlug,
@@ -142,4 +204,11 @@ module.exports = {
   createCategory,
   findCouponByCode,
   incrementCouponUses,
+  softDelete,
+  updateCategory,
+  deleteCategory,
+  listCoupons,
+  createCoupon,
+  updateCoupon,
+  deleteCoupon,
 };

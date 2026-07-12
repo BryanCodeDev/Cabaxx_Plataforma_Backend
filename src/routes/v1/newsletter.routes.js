@@ -12,6 +12,7 @@ const artistNewsletter = express.Router();
 artistNewsletter.use(artistScopeMiddleware);
 artistNewsletter.post('/subscribe', newsletterValidation.subscribe, validateMiddleware, newsletterController.subscribe);
 artistNewsletter.get('/subscribers', authMiddleware, requireArtistAdmin, newsletterController.listSubscribers);
+artistNewsletter.delete('/subscribers/:id', authMiddleware, requireArtistAdmin, newsletterController.deleteSubscriber);
 artistNewsletter.get('/campaigns', authMiddleware, requireArtistAdmin, newsletterController.listCampaigns);
 artistNewsletter.post('/campaigns', authMiddleware, requireArtistAdmin, newsletterValidation.createCampaign, validateMiddleware, newsletterController.createCampaign);
 artistNewsletter.post('/campaigns/:id/send', authMiddleware, requireArtistAdmin, newsletterController.sendCampaign);

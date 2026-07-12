@@ -64,4 +64,13 @@ async function verify(req, res, next) {
   }
 }
 
-module.exports = { upcoming, list, getBySlug, create, update, purchase, verify };
+async function remove(req, res, next) {
+  try {
+    await eventsService.deleteEvent(req.params.id, req.artistId);
+    return noContent(res);
+  } catch (err) {
+    next(err);
+  }
+}
+
+module.exports = { upcoming, list, getBySlug, create, update, remove, purchase, verify };

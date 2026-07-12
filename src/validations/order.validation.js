@@ -11,7 +11,7 @@ const checkout = [
 
 const updateStatus = [
   param('id').isInt(),
-  body('status').isIn(['pending', 'paid', 'processing', 'shipped', 'delivered', 'canceled', 'refunded']),
+  body('status').isIn(['pending', 'paid', 'processing', 'shipped', 'delivered', 'cancelled', 'refunded']),
 ];
 
 const subscribe = [

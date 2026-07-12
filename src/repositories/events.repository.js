@@ -110,6 +110,14 @@ async function markUsed(qrCode) {
   await db.query('UPDATE ticket_purchases SET used_at = NOW() WHERE qr_code = ? AND used_at IS NULL', [qrCode]);
 }
 
+async function remove(id, artistId) {
+  const [result] = await db.query(
+    `UPDATE ${EventModel.tableName} SET deleted_at = NOW() WHERE id = ? AND artist_id = ? AND deleted_at IS NULL`,
+    [id, artistId],
+  );
+  return result.affectedRows > 0;
+}
+
 module.exports = {
   findUpcoming,
   findAll,
@@ -117,6 +125,7 @@ module.exports = {
   findById,
   create,
   update,
+  remove,
   findTicket,
   createTicketPurchase,
   incrementSold,

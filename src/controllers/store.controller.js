@@ -65,4 +65,82 @@ async function validateCoupon(req, res, next) {
   }
 }
 
-module.exports = { listProducts, getProduct, createProduct, updateProduct, listCategories, createCategory, validateCoupon };
+async function deleteProduct(req, res, next) {
+  try {
+    await storeService.deleteProduct(req.params.id, req.artistId);
+    return noContent(res);
+  } catch (err) {
+    next(err);
+  }
+}
+
+async function updateCategory(req, res, next) {
+  try {
+    const category = await storeService.updateCategory(req.params.id, req.artistId, req.body);
+    return ok(res, { category });
+  } catch (err) {
+    next(err);
+  }
+}
+
+async function deleteCategory(req, res, next) {
+  try {
+    await storeService.deleteCategory(req.params.id, req.artistId);
+    return noContent(res);
+  } catch (err) {
+    next(err);
+  }
+}
+
+async function listCoupons(req, res, next) {
+  try {
+    const { rows, total } = await storeService.listCoupons(req.artistId, req.query);
+    return paginated(res, rows, total, req.query.page, req.query.limit);
+  } catch (err) {
+    next(err);
+  }
+}
+
+async function createCoupon(req, res, next) {
+  try {
+    const coupon = await storeService.createCoupon(req.artistId, req.body);
+    return created(res, { coupon });
+  } catch (err) {
+    next(err);
+  }
+}
+
+async function updateCoupon(req, res, next) {
+  try {
+    const coupon = await storeService.updateCoupon(req.params.id, req.artistId, req.body);
+    return ok(res, { coupon });
+  } catch (err) {
+    next(err);
+  }
+}
+
+async function deleteCoupon(req, res, next) {
+  try {
+    await storeService.deleteCoupon(req.params.id, req.artistId);
+    return noContent(res);
+  } catch (err) {
+    next(err);
+  }
+}
+
+module.exports = {
+  listProducts,
+  getProduct,
+  createProduct,
+  updateProduct,
+  deleteProduct,
+  listCategories,
+  createCategory,
+  updateCategory,
+  deleteCategory,
+  listCoupons,
+  createCoupon,
+  updateCoupon,
+  deleteCoupon,
+  validateCoupon,
+};

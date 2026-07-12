@@ -41,4 +41,13 @@ async function updateStatus(req, res, next) {
   }
 }
 
-module.exports = { checkout, myOrders, artistOrders, updateStatus };
+async function remove(req, res, next) {
+  try {
+    await orderService.deleteOrder(req.params.id, req.artistId);
+    return noContent(res);
+  } catch (err) {
+    next(err);
+  }
+}
+
+module.exports = { checkout, myOrders, artistOrders, updateStatus, remove };

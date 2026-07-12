@@ -92,10 +92,83 @@ async function validateCoupon(artistId, code, subtotal) {
   return { couponId: coupon.id, discount, code: coupon.code };
 }
 
+async function deleteProduct(id, artistId) {
+  const ok = await storeRepository.softDelete(id, artistId);
+  if (!ok) throw new NotFoundError('Product not found');
+  return true;
+}
+
+async function updateCategory(id, artistId, data) {
+  return storeRepository.updateCategory(id, {
+    name: data.name,
+    slug: data.slug ? slugify(data.slug) : slugify(data.name),
+    description: data.description || null,
+    image_url: data.image_url || null,
+    parent_id: data.parent_id || null,
+    sort_order: data.sort_order || 0,
+  }, artistId);
+}
+
+async function deleteCategory(id, artistId) {
+  const ok = await storeRepository.deleteCategory(id, artistId);
+  if (!ok) throw new NotFoundError('Category not found');
+  return true;
+}
+
+async function listCoupons(artistId, filters = {}) {
+  return storeRepository.listCoupons(artistId, filters);
+}
+
+async function createCoupon(artistId, data) {
+  return storeRepository.createCoupon({
+    artist_id: artistId,
+    code: String(data.code || '').toUpperCase(),
+    type: data.type || 'percent',
+    value: data.value || 0,
+    min_purchase: data.min_purchase || 0,
+    max_uses: data.max_uses || null,
+    expires_at: data.expires_at || null,
+    status: data.status || 'active',
+  });
+}
+
+async function updateCoupon(id, artistId, data) {
+  const payload = {};
+  if (data.code !== undefined) payload.code = String(data.code).toUpperCase();
+  if (data.type !== undefined) payload.type = data.type;
+  if (data.value !== undefined) payload.value = data.value;
+  if (data.min_purchase !== undefined) payload.min_purchase = data.min_purchase;
+  if (data.max_uses !== undefined) payload.max_uses = data.max_uses;
+  if (data.expires_at !== undefined) payload.expires_at = data.expires_at;
+  if (data.status !== undefined) payload.status = data.status;
+  return storeRepository.updateCoupon(id, payload, artistId);
+}
+
+async function deleteCoupon(id, artistId) {
+  const ok = await storeRepository.deleteCoupon(id, artistId);
+  if (!ok) throw new NotFoundError('Coupon not found');
+  return true;
+}
+
 // helpers
 const db = require('../config/database');
 async function dbImage(productId, url, sortOrder) {
   await db.query('INSERT INTO product_images (product_id, url, sort_order) VALUES (?, ?, ?)', [productId, url, sortOrder]);
 }
 
-module.exports = { getProducts, getProductBySlug, createProduct, updateProduct, getCategories, createCategory, validateCoupon };
+module.exports = {
+  getProducts,
+  getProductBySlug,
+  createProduct,
+  updateProduct,
+  deleteProduct,
+  getCategories,
+  createCategory,
+  updateCategory,
+  deleteCategory,
+  listCoupons,
+  createCoupon,
+  updateCoupon,
+  deleteCoupon,
+  validateCoupon,
+};

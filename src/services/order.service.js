@@ -94,4 +94,10 @@ async function updateOrderStatus(id, status, artistId = null) {
   return order;
 }
 
-module.exports = { checkout, getMyOrders, getArtistOrders, updateOrderStatus };
+async function deleteOrder(id, artistId = null) {
+  const ok = await orderRepository.softDelete(id, artistId);
+  if (!ok) throw new NotFoundError('Order not found');
+  return true;
+}
+
+module.exports = { checkout, getMyOrders, getArtistOrders, updateOrderStatus, deleteOrder };

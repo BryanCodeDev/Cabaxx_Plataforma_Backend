@@ -62,4 +62,10 @@ async function verifyTicket(qrCode) {
   return { valid: true, purchase };
 }
 
-module.exports = { getUpcomingEvents, getEvents, getEventBySlug, createEvent, updateEvent, purchaseTicket, verifyTicket };
+async function deleteEvent(id, artistId) {
+  const ok = await eventsRepository.remove(id, artistId);
+  if (!ok) throw new NotFoundError('Event not found');
+  return true;
+}
+
+module.exports = { getUpcomingEvents, getEvents, getEventBySlug, createEvent, updateEvent, deleteEvent, purchaseTicket, verifyTicket };

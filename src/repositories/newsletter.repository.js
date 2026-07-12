@@ -86,4 +86,9 @@ async function updateCampaignStats(id, { totalSent, totalOpened, totalClicked })
   return row;
 }
 
-module.exports = { subscribe, unsubscribe, findAll, getActiveBatch, countActive, saveCampaign, updateCampaignStats };
+async function removeSubscriber(id, artistId) {
+  const [result] = await db.query(`DELETE FROM ${SubscriberModel.tableName} WHERE id = ? AND artist_id = ?`, [id, artistId]);
+  return result.affectedRows > 0;
+}
+
+module.exports = { subscribe, unsubscribe, findAll, getActiveBatch, countActive, removeSubscriber, saveCampaign, updateCampaignStats };

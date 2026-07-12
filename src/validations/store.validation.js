@@ -35,4 +35,25 @@ const validateCoupon = [
   query('subtotal').optional().isFloat(),
 ];
 
-module.exports = { listProducts, getProduct, createProduct, updateProduct, createCategory, validateCoupon };
+const createCoupon = [
+  body('code').notEmpty().withMessage('Code required'),
+  body('type').optional().isIn(['percent', 'fixed']),
+  body('value').isFloat({ min: 0 }).withMessage('Value required'),
+  body('min_purchase').optional().isFloat({ min: 0 }),
+  body('max_uses').optional().isInt({ min: 1 }),
+  body('expires_at').optional().isString(),
+  body('status').optional().isIn(['active', 'inactive', 'expired']),
+];
+
+const updateCoupon = [
+  param('id').isInt(),
+  body('code').optional().isString(),
+  body('type').optional().isIn(['percent', 'fixed']),
+  body('value').optional().isFloat({ min: 0 }),
+  body('min_purchase').optional().isFloat({ min: 0 }),
+  body('max_uses').optional().isInt({ min: 1 }),
+  body('expires_at').optional().isString(),
+  body('status').optional().isIn(['active', 'inactive', 'expired']),
+];
+
+module.exports = { listProducts, getProduct, createProduct, updateProduct, createCategory, createCoupon, updateCoupon, validateCoupon };

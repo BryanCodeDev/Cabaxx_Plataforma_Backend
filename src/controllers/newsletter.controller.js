@@ -30,6 +30,15 @@ async function listSubscribers(req, res, next) {
   }
 }
 
+async function deleteSubscriber(req, res, next) {
+  try {
+    await newsletterService.deleteSubscriber(req.params.id, req.artistId);
+    return noContent(res);
+  } catch (err) {
+    next(err);
+  }
+}
+
 async function listCampaigns(req, res, next) {
   try {
     const campaigns = await newsletterService.listCampaigns(req.artistId);
@@ -57,4 +66,4 @@ async function sendCampaign(req, res, next) {
   }
 }
 
-module.exports = { subscribe, unsubscribe, listSubscribers, listCampaigns, createCampaign, sendCampaign };
+module.exports = { subscribe, unsubscribe, listSubscribers, deleteSubscriber, listCampaigns, createCampaign, sendCampaign };

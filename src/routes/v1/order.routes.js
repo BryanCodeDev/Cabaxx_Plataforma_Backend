@@ -18,6 +18,7 @@ const artistOrders = express.Router();
 artistOrders.use(artistScopeMiddleware);
 artistOrders.get('/orders', authMiddleware, requireArtistAdmin, orderController.artistOrders);
 artistOrders.put('/orders/:id/status', authMiddleware, requireArtistAdmin, orderValidation.updateStatus, validateMiddleware, orderController.updateStatus);
+artistOrders.delete('/orders/:id', authMiddleware, requireArtistAdmin, orderController.remove);
 
 module.exports = { router, myOrdersRouter, artistOrders };
 

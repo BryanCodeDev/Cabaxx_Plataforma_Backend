@@ -1,9 +1,9 @@
 module.exports = {
-  tableName: 'settings',
+  tableName: 'artist_settings',
   columns: {
     id: 'id',
     artistId: 'artist_id',
-    key: 'setting_key',
-    value: 'setting_value',
+    key: 'key',
+    value: 'value',
   },
 };

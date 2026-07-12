@@ -29,8 +29,8 @@ async function createArtist(data, adminUserId) {
     country: data.country || null,
     city: data.city || null,
     status: data.status || 'active',
-    logo_url: data.logo_url || null,
-    cover_url: data.cover_url || null,
+    avatar_url: data.avatar_url || null,
+    banner_url: data.banner_url || null,
   };
   const artist = await artistsRepository.create(payload);
   if (adminUserId) {
@@ -44,21 +44,21 @@ async function updateArtist(id, data, files = {}) {
   if (!artist) throw new NotFoundError('Artist not found');
 
   if (files.avatar) {
-    data.logo_url = await cloudinaryHelper.uploadBuffer(files.avatar.buffer, {
+    data.avatar_url = await cloudinaryHelper.uploadBuffer(files.avatar.buffer, {
       folder: 'map/artists',
       resourceType: 'image',
       publicName: `avatar-${id}`,
     });
   }
   if (files.banner) {
-    data.cover_url = await cloudinaryHelper.uploadBuffer(files.banner.buffer, {
+    data.banner_url = await cloudinaryHelper.uploadBuffer(files.banner.buffer, {
       folder: 'map/artists',
       resourceType: 'image',
       publicName: `banner-${id}`,
     });
   }
   const cleaned = {};
-  ['name', 'real_name', 'bio', 'short_bio', 'genre', 'country', 'city', 'status', 'logo_url', 'cover_url'].forEach((k) => {
+  ['name', 'real_name', 'bio', 'short_bio', 'genre', 'country', 'city', 'status', 'avatar_url', 'banner_url'].forEach((k) => {
     if (data[k] !== undefined) cleaned[k] = data[k];
   });
   return artistsRepository.update(id, cleaned);

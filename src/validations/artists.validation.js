@@ -23,6 +23,6 @@ const update = [
   body('status').optional().isIn(['active', 'inactive', 'suspended']),
 ];
 
-const stats = [param('id').isInt().withMessage('Valid id required')];
+const stats = [param('slug').notEmpty().withMessage('Slug required')];
 
 module.exports = { list, getBySlug, create, update, stats };

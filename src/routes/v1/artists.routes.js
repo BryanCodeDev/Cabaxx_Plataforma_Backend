@@ -25,6 +25,8 @@ router.post(
 );
 
 // artist_admin o superadmin (scope por id)
+router.get('/:slug/stats', authMiddleware, requireArtistAdmin, artistsValidation.stats, validateMiddleware, artistsController.stats);
+
 router.put(
   '/:id',
   authMiddleware,
@@ -34,7 +36,6 @@ router.put(
   validateMiddleware,
   artistsController.update,
 );
-router.get('/:id/stats', authMiddleware, requireArtistAdmin, artistsValidation.stats, validateMiddleware, artistsController.stats);
 
 module.exports = router;
 

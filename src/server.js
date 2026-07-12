@@ -2,11 +2,11 @@ require('dotenv').config();
 const express = require('express');
 const helmet = require('helmet');
 const cors = require('cors');
-const morgan = require('morgan');
 
 const env = require('./config/env');
 const helmetConfig = require('./middlewares/helmetConfig');
 const corsConfig = require('./config/cors');
+const loggerMiddleware = require('./middlewares/logger');
 const errorHandler = require('./middlewares/errorHandler');
 const notFoundHandler = require('./middlewares/notFoundHandler');
 const logger = require('./utils/logger');
@@ -20,7 +20,7 @@ app.use(helmetConfig);
 app.use(cors(corsConfig));
 app.use(express.json({ limit: '2mb' }));
 app.use(express.urlencoded({ extended: true }));
-app.use(morgan('combined', { stream: { write: (m) => logger.info(m.trim()) } }));
+app.use(loggerMiddleware);
 
 app.get('/health', (req, res) => res.json({ status: 'ok' }));
 

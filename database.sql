@@ -868,15 +868,24 @@ WHERE r.slug = 'user' AND p.slug IN ('analytics.view');
 INSERT INTO artists (slug, stage_name, real_name, bio, short_bio, genre, country, city, status)
 VALUES (
   'cabaxx',
-  'Cabaxx',
-  'Cabaxx',
-  'Proyecto musical urbano colombiano referente del reggaetón, trap y flow caribeño.',
-  'Urbano · Flow Colombiano · Reggaetón · Trap',
-  'Urbano',
+  'Cabitaxx',
+  'Cabitaxx',
+  NULL,
+  NULL,
+  NULL,
   'CO',
   'Medellín',
   'active'
-);
+)
+ON DUPLICATE KEY UPDATE
+  stage_name = VALUES(stage_name),
+  real_name = VALUES(real_name),
+  bio = NULL,
+  short_bio = NULL,
+  genre = NULL,
+  country = VALUES(country),
+  city = VALUES(city),
+  status = VALUES(status);
 
 INSERT INTO users (name, email, password_hash, status)
 VALUES (
@@ -884,13 +893,15 @@ VALUES (
   'admin@cabaxx.com',
   '$2b$10$g6BHkvGtip9t2rYiW1xqWOqhO1IaLI0578q0fB2P7lDX8UKLftfaW',
   'active'
-);
+)
+ON DUPLICATE KEY UPDATE id=id;
 
 -- Asignar rol superadmin al usuario (alcance global: artist_id NULL)
 INSERT INTO user_roles (user_id, role_id, artist_id)
 SELECT u.id, r.id, NULL
 FROM users u, roles r
-WHERE u.email = 'admin@cabaxx.com' AND r.slug = 'superadmin';
+WHERE u.email = 'admin@cabaxx.com' AND r.slug = 'superadmin'
+ON DUPLICATE KEY UPDATE user_id=user_id;
 
 -- Relación artist_admin para Cabitaxx (se asigna al crear el usuario dueño real desde el backend)
 -- Ejemplo (comentado): INSERT INTO user_roles (user_id, role_id, artist_id)

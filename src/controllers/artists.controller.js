@@ -35,7 +35,7 @@ async function update(req, res, next) {
       avatar: req.files && req.files.avatar && req.files.avatar[0],
       banner: req.files && req.files.banner && req.files.banner[0],
     };
-    const artist = await artistsService.updateArtist(req.params.id, req.body, files);
+    const artist = await artistsService.updateArtist(req.artistId || req.params.id, req.body, files);
     return ok(res, { artist });
   } catch (err) {
     next(err);
@@ -44,7 +44,7 @@ async function update(req, res, next) {
 
 async function stats(req, res, next) {
   try {
-    const stats = await artistsService.getArtistStats(req.params.id);
+    const stats = await artistsService.getArtistStats(req.artistId || req.params.id);
     return ok(res, { stats });
   } catch (err) {
     next(err);

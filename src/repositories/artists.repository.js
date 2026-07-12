@@ -24,7 +24,7 @@ async function findAll({ page = 1, limit = 20, status, genre, search } = {}) {
   const [{ total }] = await db.query(`SELECT COUNT(*) AS total FROM ${ArtistModel.tableName} ${clause}`, params);
   const offset = (parseInt(page, 10) - 1) * parseInt(limit, 10);
   const rows = await db.query(
-    `SELECT id, slug, name, real_name, genre, country, city, status, logo_url, cover_url
+    `SELECT id, slug, stage_name, real_name, genre, country, city, status, avatar_url, banner_url
      FROM ${ArtistModel.tableName} ${clause} ORDER BY created_at DESC LIMIT ? OFFSET ?`,
     [...params, parseInt(limit, 10), offset],
   );

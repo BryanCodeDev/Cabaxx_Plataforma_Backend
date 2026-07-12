@@ -48,34 +48,34 @@ SET @a10 = LAST_INSERT_ID();
 -- ------------------------------------------------------------
 SET @u1 = @super;
 INSERT INTO users (name, email, password_hash, avatar_url, status)
-VALUES ('Fan Uno','fan1@cabitaxx.com','$2b$10$REPLACE_WITH_BCRYPT_HASH',NULL,'active');
+VALUES ('Fan Uno','fan1@cabitaxx.com','$2b$10$XH3XRkifdZKdwGCtUZnA3OuNxn5SkFnfOT.fFpJEMmvj3tTo1S6La',NULL,'active');
 SET @u2 = LAST_INSERT_ID();
 INSERT INTO users (name, email, password_hash, avatar_url, status)
-VALUES ('Fan Dos','fan2@cabitaxx.com','$2b$10$REPLACE_WITH_BCRYPT_HASH',NULL,'active');
+VALUES ('Fan Dos','fan2@cabitaxx.com','$2b$10$XH3XRkifdZKdwGCtUZnA3OuNxn5SkFnfOT.fFpJEMmvj3tTo1S6La',NULL,'active');
 SET @u3 = LAST_INSERT_ID();
 INSERT INTO users (name, email, password_hash, avatar_url, status)
-VALUES ('Fan Tres','fan3@cabitaxx.com','$2b$10$REPLACE_WITH_BCRYPT_HASH',NULL,'active');
+VALUES ('Fan Tres','fan3@cabitaxx.com','$2b$10$XH3XRkifdZKdwGCtUZnA3OuNxn5SkFnfOT.fFpJEMmvj3tTo1S6La',NULL,'active');
 SET @u4 = LAST_INSERT_ID();
 INSERT INTO users (name, email, password_hash, avatar_url, status)
-VALUES ('Fan Cuatro','fan4@cabitaxx.com','$2b$10$REPLACE_WITH_BCRYPT_HASH',NULL,'inactive');
+VALUES ('Fan Cuatro','fan4@cabitaxx.com','$2b$10$XH3XRkifdZKdwGCtUZnA3OuNxn5SkFnfOT.fFpJEMmvj3tTo1S6La',NULL,'inactive');
 SET @u5 = LAST_INSERT_ID();
 INSERT INTO users (name, email, password_hash, avatar_url, status)
-VALUES ('Fan Cinco','fan5@cabitaxx.com','$2b$10$REPLACE_WITH_BCRYPT_HASH',NULL,'active');
+VALUES ('Fan Cinco','fan5@cabitaxx.com','$2b$10$XH3XRkifdZKdwGCtUZnA3OuNxn5SkFnfOT.fFpJEMmvj3tTo1S6La',NULL,'active');
 SET @u6 = LAST_INSERT_ID();
 INSERT INTO users (name, email, password_hash, avatar_url, status)
-VALUES ('Manager Cabitaxx','manager@cabitaxx.com','$2b$10$REPLACE_WITH_BCRYPT_HASH',NULL,'active');
+VALUES ('Manager Cabitaxx','manager@cabitaxx.com','$2b$10$XH3XRkifdZKdwGCtUZnA3OuNxn5SkFnfOT.fFpJEMmvj3tTo1S6La',NULL,'active');
 SET @u7 = LAST_INSERT_ID();
 INSERT INTO users (name, email, password_hash, avatar_url, status)
-VALUES ('Moderadora','mod@cabitaxx.com','$2b$10$REPLACE_WITH_BCRYPT_HASH',NULL,'active');
+VALUES ('Moderadora','mod@cabitaxx.com','$2b$10$XH3XRkifdZKdwGCtUZnA3OuNxn5SkFnfOT.fFpJEMmvj3tTo1S6La',NULL,'active');
 SET @u8 = LAST_INSERT_ID();
 INSERT INTO users (name, email, password_hash, avatar_url, status)
-VALUES ('Fan Ocho','fan8@cabitaxx.com','$2b$10$REPLACE_WITH_BCRYPT_HASH',NULL,'banned');
+VALUES ('Fan Ocho','fan8@cabitaxx.com','$2b$10$XH3XRkifdZKdwGCtUZnA3OuNxn5SkFnfOT.fFpJEMmvj3tTo1S6La',NULL,'banned');
 SET @u9 = LAST_INSERT_ID();
 INSERT INTO users (name, email, password_hash, avatar_url, status)
-VALUES ('Fan Nueve','fan9@cabitaxx.com','$2b$10$REPLACE_WITH_BCRYPT_HASH',NULL,'active');
+VALUES ('Fan Nueve','fan9@cabitaxx.com','$2b$10$XH3XRkifdZKdwGCtUZnA3OuNxn5SkFnfOT.fFpJEMmvj3tTo1S6La',NULL,'active');
 SET @u10 = LAST_INSERT_ID();
 INSERT INTO users (name, email, password_hash, avatar_url, status)
-VALUES ('Fan Diez','fan10@cabitaxx.com','$2b$10$REPLACE_WITH_BCRYPT_HASH',NULL,'active');
+VALUES ('Fan Diez','fan10@cabitaxx.com','$2b$10$XH3XRkifdZKdwGCtUZnA3OuNxn5SkFnfOT.fFpJEMmvj3tTo1S6La',NULL,'active');
 SET @u11 = LAST_INSERT_ID();
 
 -- ------------------------------------------------------------

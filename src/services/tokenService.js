@@ -8,16 +8,16 @@ async function storeRefreshToken(userId, tokenHash, expiresAt) {
 }
 
 async function findRefreshToken(tokenHash) {
-  const [row] = await db.query(`SELECT * FROM refresh_tokens WHERE token_hash = ? AND revoked = ?`, [tokenHash, false]);
+  const [row] = await db.query(`SELECT * FROM refresh_tokens WHERE token_hash = ? AND revoked_at IS NULL`, [tokenHash]);
   return row || null;
 }
 
 async function revokeRefreshToken(tokenHash) {
-  await db.query(`UPDATE refresh_tokens SET revoked = ? WHERE token_hash = ?`, [true, tokenHash]);
+  await db.query(`UPDATE refresh_tokens SET revoked_at = NOW() WHERE token_hash = ?`, [tokenHash]);
 }
 
 async function revokeAllForUser(userId) {
-  await db.query(`UPDATE refresh_tokens SET revoked = ? WHERE user_id = ?`, [true, userId]);
+  await db.query(`UPDATE refresh_tokens SET revoked_at = NOW() WHERE user_id = ?`, [userId]);
 }
 
 module.exports = { storeRefreshToken, findRefreshToken, revokeRefreshToken, revokeAllForUser };

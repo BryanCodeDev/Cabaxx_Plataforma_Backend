@@ -5,7 +5,7 @@ async function artistScopeMiddleware(req, res, next) {
   try {
     if (req.artist) return next();
 
-    const slugOrId = req.params.artist_slug || req.params.artist_id;
+    const slugOrId = req.params.artist_slug || req.params.artist_id || req.params.id;
     if (!slugOrId) return next();
 
     const artist = /^\d+$/.test(String(slugOrId))

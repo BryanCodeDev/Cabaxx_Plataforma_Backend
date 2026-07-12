@@ -8,6 +8,6 @@ module.exports = {
     role: 'role',
     firstName: 'first_name',
     lastName: 'last_name',
-    isActive: 'is_active',
+    isActive: 'status',
   },
 };

@@ -39,7 +39,8 @@ async function logout(req, res, next) {
 
 async function me(req, res, next) {
   try {
-    return ok(res, { user: req.user });
+    const result = await authService.me(req.user.id);
+    return ok(res, { user: result });
   } catch (err) {
     next(err);
   }

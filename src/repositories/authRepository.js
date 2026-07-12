@@ -6,16 +6,27 @@ async function findByEmail(email) {
   return row || null;
 }
 
+async function findRolesByUserId(userId) {
+  const rows = await db.query(
+    `SELECT r.slug AS role, ur.artist_id AS artistId
+     FROM user_roles ur
+     JOIN roles r ON r.id = ur.role_id
+     WHERE ur.user_id = ?`,
+    [userId],
+  );
+  return rows;
+}
+
 async function findById(id) {
   const [row] = await db.query(`SELECT * FROM ${UserModel.tableName} WHERE id = ?`, [id]);
   return row || null;
 }
 
-async function create({ email, passwordHash, role, artistId, firstName, lastName }) {
+async function create({ email, passwordHash }) {
   const [result] = await db.query(
-    `INSERT INTO ${UserModel.tableName} (artist_id, email, password_hash, role, first_name, last_name, is_active)
-     VALUES (?, ?, ?, ?, ?, ?, ?)`,
-    [artistId || null, email, passwordHash, role, firstName || null, lastName || null, true],
+    `INSERT INTO ${UserModel.tableName} (email, password_hash, status)
+     VALUES (?, ?, ?)`,
+    [email, passwordHash, 'active'],
   );
   return findById(result.insertId);
 }
@@ -25,4 +36,4 @@ async function updatePassword(id, passwordHash) {
   return findById(id);
 }
 
-module.exports = { findByEmail, findById, create, updatePassword };
+module.exports = { findByEmail, findById, findRolesByUserId, create, updatePassword };

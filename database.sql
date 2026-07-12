@@ -867,21 +867,21 @@ WHERE r.slug = 'user' AND p.slug IN ('analytics.view');
 -- Artista inicial: Cabitaxx
 INSERT INTO artists (slug, stage_name, real_name, bio, short_bio, genre, country, city, status)
 VALUES (
-  'cabitaxx',
-  'Cabitaxx',
-  'Juan Esteban Cabas Torres',
-  'Cabitaxx es el proyecto musical de Juan Esteban Cabas Torres, artista multi-instrumentista y productor.',
-  'Artista musical urbano y experimental.',
-  'Latin Urban',
+  'cabaxx',
+  'Cabaxx',
+  'Cabaxx',
+  'Proyecto musical urbano colombiano referente del reggaetón, trap y flow caribeño.',
+  'Urbano · Flow Colombiano · Reggaetón · Trap',
+  'Urbano',
   'CO',
-  'Bogotá',
+  'Medellín',
   'active'
 );
 
 INSERT INTO users (name, email, password_hash, status)
 VALUES (
-  'MasterCode Admin',
-  'admin@mastercode.co',
+  'Cabaxx Admin',
+  'admin@cabaxx.com',
   '$2b$10$g6BHkvGtip9t2rYiW1xqWOqhO1IaLI0578q0fB2P7lDX8UKLftfaW',
   'active'
 );
@@ -890,12 +890,12 @@ VALUES (
 INSERT INTO user_roles (user_id, role_id, artist_id)
 SELECT u.id, r.id, NULL
 FROM users u, roles r
-WHERE u.email = 'admin@mastercode.co' AND r.slug = 'superadmin';
+WHERE u.email = 'admin@cabaxx.com' AND r.slug = 'superadmin';
 
 -- Relación artist_admin para Cabitaxx (se asigna al crear el usuario dueño real desde el backend)
 -- Ejemplo (comentado): INSERT INTO user_roles (user_id, role_id, artist_id)
 --   SELECT u.id, r.id, a.id FROM users u, roles r, artists a
---   WHERE u.email='juan@cabitaxx.com' AND r.slug='artist_admin' AND a.slug='cabitaxx';
+--   WHERE u.email='admin@cabaxx.com' AND r.slug='artist_admin' AND a.slug='cabaxx';
 
 -- ============================================================
 -- DIAGRAMA DE RELACIONES (FK)

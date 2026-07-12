@@ -11,11 +11,11 @@ describe('tenantResolver', () => {
   });
 
   it('resolves from X-Artist-Slug header', async () => {
-    const req = { headers: { 'x-artist-slug': 'cabitaxx' }, query: {}, hostname: 'localhost' };
+    const req = { headers: { 'x-artist-slug': 'cabaxx' }, query: {}, hostname: 'localhost' };
     const next = jest.fn();
     await resolveArtist(req, null, next);
     expect(req.artist).toBeDefined();
-    expect(req.artist.slug).toBe('cabitaxx');
+    expect(req.artist.slug).toBe('cabaxx');
     expect(req.artistId).toBe(req.artist.id);
     expect(next).toHaveBeenCalled();
   });

@@ -1,7 +1,7 @@
 {
-  "name": "map-backend",
+  "name": "cabaxx-backend",
   "version": "1.0.0",
-  "description": "MAP - Master Artist Platform backend (multi-tenant SaaS)",
+  "description": "Cabaxx backend",
   "main": "src/server.js",
   "scripts": {
     "start": "node src/server.js",

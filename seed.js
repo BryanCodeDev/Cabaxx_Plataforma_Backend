@@ -13,7 +13,7 @@ async function runSeeds() {
   });
 
   try {
-    const seedFiles = ['seed_data.sql', 'seed-demo.sql'];
+    const seedFiles = ['database.sql', 'seed_data.sql'];
     
     for (const seedFile of seedFiles) {
       const seedPath = path.join(__dirname, seedFile);

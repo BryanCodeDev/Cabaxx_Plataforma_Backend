@@ -24,7 +24,7 @@ async function getSitemap(artistSlug) {
   const [artist] = await db.query('SELECT slug, updated_at FROM artists WHERE slug = ? AND status = ?', [artistSlug, 'active']);
   if (!artist) throw new NotFoundError('Artist not found');
 
-  const origin = 'https://map.mastercode.co';
+  const origin = 'https://cabaxx.com';
   const baseUrl = `${origin}/${artistSlug}`;
   const now = new Date().toISOString();
 
@@ -89,7 +89,7 @@ async function getRobotsTxt(artistSlug) {
   const [artist] = await db.query('SELECT slug FROM artists WHERE slug = ? AND status = ?', [artistSlug, 'active']);
   if (!artist) throw new NotFoundError('Artist not found');
 
-  const baseUrl = `https://map.mastercode.co/${artistSlug}`;
+  const baseUrl = `https://cabaxx.com/${artistSlug}`;
   return `User-agent: *\nAllow: /\n\nSitemap: ${baseUrl}/sitemap.xml\n`;
 }
 
@@ -116,7 +116,7 @@ function buildJsonLd(artist, type, data) {
     '@context': 'https://schema.org',
     '@type': 'MusicGroup',
     name: artist.stage_name || artist.name,
-    url: `https://map.mastercode.co/${artist.slug}`,
+    url: `https://cabaxx.com/${artist.slug}`,
   };
 
   if (type === 'MusicRecording' && data) {

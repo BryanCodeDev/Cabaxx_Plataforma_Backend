@@ -20,7 +20,7 @@ function generateMockMercadoPagoPreference(amount, currency, orderId, artistId) 
       {
         id: String(orderId),
         title: `Orden #${orderId}`,
-        description: `Pago de orden en MAP — Artista ${artistId}`,
+        description: `Pago de orden en Cabaxx — Artista ${artistId}`,
         quantity: 1,
         unit_price: Number(amount),
         currency_id: currency || 'COP',

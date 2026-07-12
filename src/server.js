@@ -25,13 +25,13 @@ app.use(loggerMiddleware);
 app.get('/health', (req, res) => res.json({ status: 'ok' }));
 
 app.get('/sitemap.xml', (req, res, next) => {
-  const artistSlug = req.query.artist || 'cabitaxx';
+  const artistSlug = req.query.artist || 'cabaxx';
   req.params = { artist_slug: artistSlug };
   seoRouter.handle(req, res, next);
 });
 
 app.get('/robots.txt', (req, res, next) => {
-  const artistSlug = req.query.artist || 'cabitaxx';
+  const artistSlug = req.query.artist || 'cabaxx';
   req.params = { artist_slug: artistSlug };
   seoRouter.handle(req, res, next);
 });
@@ -43,7 +43,7 @@ app.use(errorHandler);
 
 const PORT = env.port || 4000;
 if (require.main === module) {
-  app.listen(PORT, () => logger.info(`MAP API listening on :${PORT}`));
+  app.listen(PORT, () => logger.info(`Cabaxx API listening on :${PORT}`));
 }
 
 module.exports = app;

@@ -1,5 +1,5 @@
 const storeService = require('../services/store.service');
-const { ok, paginated, created } = require('./controllerHelper');
+const { ok, paginated, created, noContent } = require('./controllerHelper');
 
 async function listProducts(req, res, next) {
   try {

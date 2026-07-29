@@ -1,5 +1,5 @@
 const paymentService = require('../services/paymentService');
-const { ok, created, noContent } = require('./controllerHelper');
+const { ok, created } = require('./controllerHelper');
 
 async function checkout(req, res, next) {
   try {

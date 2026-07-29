@@ -1,5 +1,5 @@
 const orderService = require('../services/order.service');
-const { ok, paginated, created } = require('./controllerHelper');
+const { ok, paginated, created, noContent } = require('./controllerHelper');
 
 async function checkout(req, res, next) {
   try {

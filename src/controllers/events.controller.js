@@ -1,5 +1,5 @@
 const eventsService = require('../services/events.service');
-const { ok, paginated, created } = require('./controllerHelper');
+const { ok, paginated, created, noContent } = require('./controllerHelper');
 
 async function upcoming(req, res, next) {
   try {

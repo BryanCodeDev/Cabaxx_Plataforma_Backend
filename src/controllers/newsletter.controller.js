@@ -1,5 +1,5 @@
 const newsletterService = require('../services/newsletter.service');
-const { ok, paginated, created } = require('./controllerHelper');
+const { ok, paginated, created, noContent } = require('./controllerHelper');
 
 async function subscribe(req, res, next) {
   try {

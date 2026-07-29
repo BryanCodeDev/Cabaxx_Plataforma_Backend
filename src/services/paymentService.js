@@ -1,6 +1,6 @@
 const paymentRepository = require('../repositories/paymentRepository');
-const orderRepository = require('../repositories/orderRepository');
-const orderService = require('./orderService');
+const orderRepository = require('../repositories/order.repository');
+const orderService = require('./order.service');
 const crypto = require('crypto');
 const env = require('../config/env');
 
@@ -63,12 +63,12 @@ async function handleWebhook(payload) {
   if (status === 'succeeded' || status === 'paid') {
     if (current.status !== 'paid') {
       await orderRepository.updateStatus(orderId, 'paid');
-      await orderService.updateStatus(orderId, 'paid', current.artist_id);
+      await orderService.updateOrderStatus(orderId, 'paid', current.artist_id);
     }
   } else if (status === 'failure' || status === 'cancelled') {
     if (current.status !== 'cancelled') {
       await orderRepository.updateStatus(orderId, 'cancelled');
-      await orderService.updateStatus(orderId, 'cancelled', current.artist_id);
+      await orderService.updateOrderStatus(orderId, 'cancelled', current.artist_id);
     }
   }
 

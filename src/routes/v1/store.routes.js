@@ -7,7 +7,7 @@ const authMiddleware = require('../../middlewares/authMiddleware');
 const validateMiddleware = require('../../middlewares/validateMiddleware');
 const upload = require('../../middlewares/uploadMiddleware');
 const { artistScopeMiddleware, requireArtistAdmin } = require('../../middlewares/artistScopeMiddleware');
-const checkPlan = require('../../middlewares/checkPlan.middleware');
+const checkPlan = require('../../middlewares/checkPlanMiddleware');
 
 router.use(artistScopeMiddleware);
 

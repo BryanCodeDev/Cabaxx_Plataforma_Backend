@@ -1,4 +1,4 @@
-const artistRepository = require('./artistRepository');
+const artistRepository = require('./artists.repository');
 const db = require('../config/database');
 
 async function listUsers({ page = 1, limit = 20 } = {}) {

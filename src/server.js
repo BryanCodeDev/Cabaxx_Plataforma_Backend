@@ -24,15 +24,15 @@ app.use(loggerMiddleware);
 
 app.get('/health', (req, res) => res.json({ status: 'ok' }));
 
+const ARTIST_SLUG = 'cabaxx';
+
 app.get('/sitemap.xml', (req, res, next) => {
-  const artistSlug = req.query.artist || 'cabaxx';
-  req.params = { artist_slug: artistSlug };
+  req.params = { artist_slug: ARTIST_SLUG };
   seoRouter.handle(req, res, next);
 });
 
 app.get('/robots.txt', (req, res, next) => {
-  const artistSlug = req.query.artist || 'cabaxx';
-  req.params = { artist_slug: artistSlug };
+  req.params = { artist_slug: ARTIST_SLUG };
   seoRouter.handle(req, res, next);
 });
 

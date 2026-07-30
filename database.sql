@@ -99,7 +99,7 @@ CREATE INDEX idx_users_status ON users (status);
 CREATE INDEX idx_users_created ON users (created_at);
 
 -- ============================================================
--- GRUPO 2 — ARTISTAS (núcleo del multi-tenant)
+-- GRUPO 2 — ARTISTA PRINCIPAL (Cabaxx)
 -- ============================================================
 
 CREATE TABLE artists (
@@ -120,7 +120,7 @@ CREATE TABLE artists (
   deleted_at   TIMESTAMP NULL DEFAULT NULL COMMENT 'Soft delete',
   PRIMARY KEY (id),
   UNIQUE KEY uk_artists_slug (slug)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Artistas inquilinos (tenant root)';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Artista principal (Cabaxx)';
 
 CREATE TABLE user_roles (
   id        BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -135,7 +135,7 @@ CREATE TABLE user_roles (
   CONSTRAINT fk_ur_user FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT fk_ur_role FOREIGN KEY (role_id) REFERENCES roles (id) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT fk_ur_artist FOREIGN KEY (artist_id) REFERENCES artists (id) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Un usuario puede ser admin de varios artistas (multi-tenant)';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Un usuario puede ser admin del artista principal';
 
 CREATE TABLE artist_social_links (
   id             BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -166,7 +166,7 @@ CREATE TABLE artist_themes (
   PRIMARY KEY (id),
   UNIQUE KEY uk_theme_artist (artist_id),
   CONSTRAINT fk_theme_artist FOREIGN KEY (artist_id) REFERENCES artists (id) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Tema visual por tenant';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Tema visual del artista';
 
 CREATE TABLE artist_seo (
   id             BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -196,7 +196,7 @@ CREATE TABLE artist_settings (
   UNIQUE KEY uk_settings_artist_key (artist_id, `key`),
   KEY idx_settings_artist (artist_id),
   CONSTRAINT fk_settings_artist FOREIGN KEY (artist_id) REFERENCES artists (id) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Configuraciones clave-valor por tenant';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Configuraciones clave-valor del artista';
 
 CREATE TABLE artist_domains (
   id           BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -211,7 +211,7 @@ CREATE TABLE artist_domains (
   KEY idx_domains_artist (artist_id),
   KEY idx_domains_primary (artist_id, is_primary),
   CONSTRAINT fk_domains_artist FOREIGN KEY (artist_id) REFERENCES artists (id) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Dominios personalizados por tenant';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Dominios personalizados del artista';
 
 -- ============================================================
 -- GRUPO 3 — MÚSICA
@@ -240,7 +240,7 @@ CREATE TABLE songs (
   KEY idx_songs_artist_status (artist_id, status),
   KEY idx_songs_release (artist_id, release_date),
   CONSTRAINT fk_song_artist FOREIGN KEY (artist_id) REFERENCES artists (id) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Canciones multi-tenant';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Canciones del artista';
 
 CREATE TABLE albums (
   id           BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -913,7 +913,7 @@ ON DUPLICATE KEY UPDATE user_id=user_id;
 -- ============================================================
 -- users 1──┐
 --          ├─< user_roles >── roles
---          ├─< user_roles >── artists (alcance multi-tenant)
+--          ├─< user_roles >── artists (alcance del artista)
 --          ├─< refresh_tokens
 --          ├─< sessions
 -- roles 1──< role_permissions >── permissions
@@ -1017,10 +1017,10 @@ ON DUPLICATE KEY UPDATE user_id=user_id;
 -- ============================================================
 -- NOTAS DE DISEÑO
 -- ============================================================
--- 1. Multi-tenant: toda tabla de contenido posee artist_id como FK a artists.
+-- 1. Single-tenant: toda tabla de contenido posee artist_id como FK a artists (único artista: Cabaxx).
 -- 2. Soft delete: tablas de estado/entidad usan deleted_at (NULL = activo).
 -- 3. ENUM solo para valores estables (status, type, currency, etc.).
 -- 4. Relaciones polimórficas (comments, likes) usan reference_type + reference_id.
 -- 5. auditoría y analíticas usan JSON para flexibilidad sin esquema rígido.
--- 6. Multi-tenant: toda tabla de contenido posee artist_id como FK a artists.
+-- 6. Single-tenant: toda tabla de contenido posee artist_id como FK a artists (único artista: Cabaxx).
 -- 7. Soft delete: tablas de estado/entidad usan deleted_at (NULL = activo).

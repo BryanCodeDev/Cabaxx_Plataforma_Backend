@@ -19,9 +19,6 @@ const adminRoutes = require('./adminRoutes');
 const videoRoutes = require('./videoRoutes');
 const seoRoutes = require('./seo.routes');
 const communityRoutes = require('./community.routes');
-const { resolveArtist } = require('../../middlewares/tenantResolver');
-
-router.use(resolveArtist);
 
 router.use('/auth', authRoutes);
 router.use('/artists', artistsRoutes);

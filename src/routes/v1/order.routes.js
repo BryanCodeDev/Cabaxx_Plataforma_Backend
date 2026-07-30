@@ -4,11 +4,10 @@ const orderController = require('../../controllers/order.controller');
 const orderValidation = require('../../validations/order.validation');
 const authMiddleware = require('../../middlewares/authMiddleware');
 const validateMiddleware = require('../../middlewares/validateMiddleware');
-const tenantMiddleware = require('../../middlewares/tenantMiddleware');
 const { artistScopeMiddleware, requireArtistAdmin } = require('../../middlewares/artistScopeMiddleware');
 
 const router = express.Router();
-router.post('/', authMiddleware, tenantMiddleware, orderValidation.checkout, validateMiddleware, orderController.checkout);
+router.post('/', authMiddleware, orderValidation.checkout, validateMiddleware, orderController.checkout);
 
 const myOrdersRouter = express.Router();
 myOrdersRouter.use(authMiddleware);

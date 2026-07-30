@@ -3,9 +3,8 @@ const router = express.Router();
 
 const settingsController = require('../../controllers/settingsController');
 const authMiddleware = require('../../middlewares/authMiddleware');
-const tenantMiddleware = require('../../middlewares/tenantMiddleware');
 
-router.use(authMiddleware, tenantMiddleware);
+router.use(authMiddleware);
 router.get('/', settingsController.getSettings);
 router.put('/', settingsController.updateSettings);
 

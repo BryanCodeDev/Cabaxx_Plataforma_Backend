@@ -7,7 +7,6 @@ const authMiddleware = require('../../middlewares/authMiddleware');
 const validateMiddleware = require('../../middlewares/validateMiddleware');
 const upload = require('../../middlewares/uploadMiddleware');
 const { artistScopeMiddleware, requireArtistAdmin } = require('../../middlewares/artistScopeMiddleware');
-const checkPlan = require('../../middlewares/checkPlanMiddleware');
 
 router.use(artistScopeMiddleware);
 
@@ -16,8 +15,6 @@ router.get('/products/:slug', storeValidation.getProduct, validateMiddleware, st
 router.get('/product-categories', storeController.listCategories);
 router.get('/coupons', authMiddleware, requireArtistAdmin, storeController.listCoupons);
 router.get('/coupons/validate', storeController.validateCoupon);
-
-router.use(checkPlan('store'));
 
 router.post('/products', authMiddleware, requireArtistAdmin, upload.single('cover'), storeValidation.createProduct, validateMiddleware, storeController.createProduct);
 router.put('/products/:id', authMiddleware, requireArtistAdmin, upload.single('cover'), storeValidation.updateProduct, validateMiddleware, storeController.updateProduct);

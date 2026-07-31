@@ -19,6 +19,9 @@ const adminRoutes = require('./adminRoutes');
 const videoRoutes = require('./videoRoutes');
 const seoRoutes = require('./seo.routes');
 const communityRoutes = require('./community.routes');
+const contactController = require('../../controllers/contactController');
+const contactValidation = require('../../validations/contact.validation');
+const validateMiddleware = require('../../middlewares/validateMiddleware');
 
 router.use('/auth', authRoutes);
 router.use('/artists', artistsRoutes);
@@ -42,5 +45,6 @@ router.use('/settings', settingsRoutes);
 router.use('/admin', adminRoutes);
 router.use('/seo/:artist_slug', seoRoutes);
 router.use('/community', communityRoutes);
+router.post('/contact', contactValidation.contact, validateMiddleware, contactController.sendContact);
 
 module.exports = router;

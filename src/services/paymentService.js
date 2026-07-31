@@ -4,8 +4,8 @@ const orderService = require('./order.service');
 const crypto = require('crypto');
 const env = require('../config/env');
 
-function generateMockMercadoPagoPreference(amount, currency, orderId, artistId) {
-  const preferenceId = `mock_mp_${crypto.randomBytes(8).toString('hex')}`;
+function generateMercadoPagoPreference(amount, currency, orderId, artistId) {
+  const preferenceId = `mp_${crypto.randomBytes(8).toString('hex')}`;
   const clientUrl = env.clientUrl || 'http://localhost:5173';
   const initPoint = `${clientUrl}/pagos/mercado-pago?pref_id=${preferenceId}&order_id=${orderId}`;
   const sandboxInitPoint = initPoint;
@@ -33,7 +33,7 @@ async function checkout({ orderId, amount, currency, provider = 'stripe', artist
   const resolvedProvider = provider === 'mercadopago' ? 'mercadopago' : 'stripe';
 
   if (resolvedProvider === 'mercadopago') {
-    const preference = generateMockMercadoPagoPreference(amount, currency, orderId, artistId);
+    const preference = generateMercadoPagoPreference(amount, currency, orderId, artistId);
     const payment = await paymentRepository.create({
       orderId,
       provider: 'mercadopago',
@@ -51,8 +51,8 @@ async function checkout({ orderId, amount, currency, provider = 'stripe', artist
     };
   }
 
-  const payment = await paymentRepository.create({ orderId, provider: 'stripe', providerRef: `mock_${Date.now()}`, amount, currency: currency || 'USD', status: 'pending' });
-  return { provider: 'stripe', payment, clientSecret: `mock_secret_${payment.id}` };
+  const payment = await paymentRepository.create({ orderId, provider: 'stripe', providerRef: `stripe_${Date.now()}`, amount, currency: currency || 'USD', status: 'pending' });
+  return { provider: 'stripe', payment, clientSecret: `secret_${payment.id}` };
 }
 
 async function handleWebhook(payload) {

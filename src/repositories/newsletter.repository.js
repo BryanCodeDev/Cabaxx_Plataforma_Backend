@@ -9,9 +9,9 @@ async function subscribe({ artistId, email, name, source }) {
     [artistId, email],
   );
   if (existing) {
-    if (existing.status === 'unsubscribed') {
+     if (existing.status === 'unsubscribed') {
       await db.query(
-        `UPDATE ${SubscriberModel.tableName} SET status = 'active', unsubscribed_at = NULL WHERE id = ?`,
+        `UPDATE ${SubscriberModel.tableName} SET status = 'subscribed', unsubscribed_at = NULL WHERE id = ?`,
         [existing.id],
       );
     }
@@ -19,9 +19,9 @@ async function subscribe({ artistId, email, name, source }) {
     return row;
   }
   const unsubToken = crypto.randomBytes(16).toString('hex');
-  const [result] = await db.query(
+  const result = await db.query(
     `INSERT INTO ${SubscriberModel.tableName} (artist_id, email, name, source, status, unsub_token, subscribed_at)
-     VALUES (?, ?, ?, ?, 'active', ?, NOW())`,
+     VALUES (?, ?, ?, ?, 'subscribed', ?, NOW())`,
     [artistId, email, name || null, source || 'website', unsubToken],
   );
   const [row] = await db.query(`SELECT * FROM ${SubscriberModel.tableName} WHERE id = ?`, [result.insertId]);
@@ -59,7 +59,7 @@ async function findAll(artistId, { page = 1, limit = 50, status, search } = {}) 
 
 async function getActiveBatch(artistId, limit, offset) {
   return db.query(
-    `SELECT id, email, name FROM ${SubscriberModel.tableName} WHERE artist_id = ? AND status = 'active' LIMIT ? OFFSET ?`,
+    `  SELECT id, email, name FROM ${SubscriberModel.tableName} WHERE artist_id = ? AND status = 'subscribed' LIMIT ? OFFSET ?`,
     [artistId, limit, offset],
   );
 }

@@ -825,68 +825,8 @@ CREATE TABLE song_plays (
 SET FOREIGN_KEY_CHECKS = 1;
 
 -- ============================================================
--- DATOS INICIALES (SEED)
+-- USUARIO ADMINISTRADOR
 -- ============================================================
-
--- Roles
-INSERT INTO roles (name, slug, description) VALUES
-  ('Super Admin', 'superadmin', 'Control total del SaaS, todos los artistas'),
-  ('Artist Admin', 'artist_admin', 'Administrador del artista (dueño/gestor)'),
-  ('User', 'user', 'Fan con cuenta (carrito, newsletter, comentarios)'),
-  ('Guest', 'guest', 'Visitante público sin sesión');
-
--- Permisos por módulo
-INSERT INTO permissions (name, slug, module, description) VALUES
-  ('Ver dashboard', 'dashboard.view', 'dashboard', 'Acceder al panel del artista'),
-  ('Editar perfil artista', 'artist.update', 'artist', 'Editar datos del artista'),
-  ('Gestionar canciones', 'songs.manage', 'songs', 'CRUD de canciones'),
-  ('Gestionar álbumes', 'albums.manage', 'albums', 'CRUD de álbumes'),
-  ('Gestionar videos', 'videos.manage', 'videos', 'CRUD de videos'),
-  ('Gestionar eventos', 'events.manage', 'events', 'CRUD de eventos'),
-  ('Gestionar tienda', 'store.manage', 'store', 'CRUD de productos y pedidos'),
-  ('Gestionar blog', 'blog.manage', 'blog', 'CRUD de posts'),
-  ('Gestionar galería', 'gallery.manage', 'gallery', 'CRUD de galería'),
-  ('Gestionar newsletter', 'newsletter.manage', 'newsletter', 'Suscriptores y campañas'),
-  ('Ver analíticas', 'analytics.view', 'analytics', 'Métricas del artista'),
-  ('Admin SaaS', 'saas.admin', 'saas', 'Gestión cross-artist (solo superadmin)');
-
--- Permisos para superadmin (todos)
-INSERT INTO role_permissions (role_id, permission_id)
-SELECT r.id, p.id FROM roles r CROSS JOIN permissions p WHERE r.slug = 'superadmin';
-
--- Permisos para artist_admin (todo excepto saas.admin)
-INSERT INTO role_permissions (role_id, permission_id)
-SELECT r.id, p.id FROM roles r CROSS JOIN permissions p
-WHERE r.slug = 'artist_admin' AND p.slug != 'saas.admin';
-
--- Permiso de ver dashboard para user (solo lectura de su propio perfil/órdenes, ejemplo mínimo)
-INSERT INTO role_permissions (role_id, permission_id)
-SELECT r.id, p.id FROM roles r CROSS JOIN permissions p
-WHERE r.slug = 'user' AND p.slug IN ('analytics.view');
-
--- Artista inicial: Cabitaxx
-INSERT INTO artists (slug, stage_name, real_name, bio, short_bio, genre, country, city, status)
-VALUES (
-  'cabaxx',
-  'Cabitaxx',
-  'Cabitaxx',
-  NULL,
-  NULL,
-  NULL,
-  'CO',
-  'Medellín',
-  'active'
-)
-ON DUPLICATE KEY UPDATE
-  stage_name = VALUES(stage_name),
-  real_name = VALUES(real_name),
-  bio = NULL,
-  short_bio = NULL,
-  genre = NULL,
-  country = VALUES(country),
-  city = VALUES(city),
-  status = VALUES(status);
-
 INSERT INTO users (name, email, password_hash, status)
 VALUES (
   'Cabaxx Admin',
@@ -895,18 +835,6 @@ VALUES (
   'active'
 )
 ON DUPLICATE KEY UPDATE id=id;
-
--- Asignar rol superadmin al usuario (alcance global: artist_id NULL)
-INSERT INTO user_roles (user_id, role_id, artist_id)
-SELECT u.id, r.id, NULL
-FROM users u, roles r
-WHERE u.email = 'admin@cabaxx.com' AND r.slug = 'superadmin'
-ON DUPLICATE KEY UPDATE user_id=user_id;
-
--- Relación artist_admin para Cabitaxx (se asigna al crear el usuario dueño real desde el backend)
--- Ejemplo (comentado): INSERT INTO user_roles (user_id, role_id, artist_id)
---   SELECT u.id, r.id, a.id FROM users u, roles r, artists a
---   WHERE u.email='admin@cabaxx.com' AND r.slug='artist_admin' AND a.slug='cabaxx';
 
 -- ============================================================
 -- DIAGRAMA DE RELACIONES (FK)

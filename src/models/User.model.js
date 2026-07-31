@@ -5,6 +5,7 @@ module.exports = {
     artistId: 'artist_id',
     email: 'email',
     passwordHash: 'password_hash',
+    name: 'name',
     role: 'role',
     firstName: 'first_name',
     lastName: 'last_name',

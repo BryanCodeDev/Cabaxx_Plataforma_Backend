@@ -22,11 +22,11 @@ async function findById(id) {
   return row || null;
 }
 
-async function create({ email, passwordHash }) {
-  const [result] = await db.query(
-    `INSERT INTO ${UserModel.tableName} (email, password_hash, status)
-     VALUES (?, ?, ?)`,
-    [email, passwordHash, 'active'],
+async function create({ email, passwordHash, name }) {
+  const result = await db.query(
+    `INSERT INTO ${UserModel.tableName} (name, email, password_hash, status)
+     VALUES (?, ?, ?, ?)`,
+    [name, email, passwordHash, 'active'],
   );
   return findById(result.insertId);
 }

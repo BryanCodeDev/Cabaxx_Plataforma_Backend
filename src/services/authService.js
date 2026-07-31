@@ -8,11 +8,11 @@ const { NotFoundError, ConflictError, UnauthorizedError } = require('../exceptio
 const { resetPasswordTemplate } = require('../helpers/emailTemplates');
 const env = require('../config/env');
 
-async function register({ email, password, firstName, lastName, role = 'user', artistId = null }) {
+async function register({ email, password, name, role = 'user', artistId = null }) {
   const existing = await authRepository.findByEmail(email);
   if (existing) throw new ConflictError('Email already registered');
   const passwordHash = await hashPassword(password);
-  const user = await authRepository.create({ email, passwordHash, role, artistId, firstName, lastName });
+  const user = await authRepository.create({ email, passwordHash, name, role, artistId });
   return sanitize(user);
 }
 

@@ -39,6 +39,17 @@ async function findOrdersByUser(userId, { page = 1, limit = 20, status } = {}) {
   const [{ total }] = await db.query(`SELECT COUNT(*) AS total FROM ${OrderModel.tableName} ${clause}`, params);
   const offset = (parseInt(page, 10) - 1) * parseInt(limit, 10);
   const rows = await db.query(`SELECT * FROM ${OrderModel.tableName} ${clause} ORDER BY created_at DESC LIMIT ? OFFSET ?`, [...params, parseInt(limit, 10), offset]);
+  for (const order of rows) {
+    const items = await db.query(`SELECT * FROM ${OrderItemModel.tableName} WHERE order_id = ?`, [order.id]);
+    order.items = items.map((item) => {
+      const snapshot = JSON.parse(item.snapshot_json || '{}');
+      return {
+        name: snapshot.name || `Producto #${item.product_id}`,
+        qty: item.quantity,
+        price: Number(item.unit_price),
+      };
+    });
+  }
   return { rows, total };
 }
 

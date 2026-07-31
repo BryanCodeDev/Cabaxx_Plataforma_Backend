@@ -13,6 +13,7 @@ const logger = require('./utils/logger');
 
 const apiRouter = require('./routes');
 const seoRouter = require('./routes/v1/seo.routes');
+const seoService = require('./services/seo.service');
 
 const app = express();
 
@@ -27,13 +28,17 @@ app.get('/health', (req, res) => res.json({ status: 'ok' }));
 const ARTIST_SLUG = 'cabaxx';
 
 app.get('/sitemap.xml', (req, res, next) => {
-  req.params = { artist_slug: ARTIST_SLUG };
-  seoRouter.handle(req, res, next);
+  seoService.getSitemap(ARTIST_SLUG).then((xml) => {
+    res.set('Content-Type', 'application/xml');
+    res.send(xml);
+  }).catch(next);
 });
 
 app.get('/robots.txt', (req, res, next) => {
-  req.params = { artist_slug: ARTIST_SLUG };
-  seoRouter.handle(req, res, next);
+  seoService.getRobotsTxt(ARTIST_SLUG).then((text) => {
+    res.set('Content-Type', 'text/plain');
+    res.send(text);
+  }).catch(next);
 });
 
 app.use('/api', apiRouter);

@@ -224,32 +224,23 @@ El middleware `checkPlan` habilita features segun el plan almacenado en `artist_
 2. Crea un servicio MySQL en Railway.
 3. Crea el servicio Node.js:
    - **Root directory**: `Backend`
-   - **Start command**: `node src/server.js`
-   - Railway detectara automaticamente el `railway.json` y `Procfile`.
-4. Variables de entorno en Railway (se inyectan automaticamente desde MySQL):
-   - `DB_HOST`, `DB_PORT`, `DB_USER`, `DB_PASSWORD`, `DB_NAME`
-   - `JWT_ACCESS_SECRET` = genera un secreto seguro
-   - `JWT_REFRESH_SECRET` = genera un secreto seguro
+   - **Start command**: lo define `railway.json` → `node migrate.js && node seed.js && node src/server.js` (corre migración + seed antes de levantar el API).
+4. Variables de entorno en Railway:
+   - `DATABASE_URL` o `DB_HOST`/`DB_PORT`/`DB_USER`/`DB_PASSWORD`/`DB_NAME` (se inyectan automáticamente desde MySQL).
+   - `DB_SSL=true` (managed MySQL).
+   - `JWT_ACCESS_SECRET` = genera un secreto seguro de 32+ chars.
+   - `JWT_REFRESH_SECRET` = genera un secreto seguro de 32+ chars.
    - `CLIENT_URL` = `https://cabitaxx.netlify.app`
    - `CORS_ORIGIN` = `https://cabitaxx.netlify.app`
-5. Despues del deploy, ejecuta la migracion:
-   ```bash
-   railway run npm run migrate
-   railway run npm run seed
-   ```
+   - `ADMIN_EMAIL`, `ADMIN_NAME`, `ADMIN_PASSWORD` para que `seed.js` cree/actualice el admin inicial.
+5. Cada deploy corre migrate + seed de forma idempotente, así que no es necesario correr `railway run npm run migrate` manualmente.
 
 ### Base de datos — MySQL (Railway)
 
 1. Crea una base de datos MySQL en Railway.
-2. Las variables `DB_HOST`, `DB_PORT`, `DB_USER`, `DB_PASSWORD`, `DB_NAME` se inyectan automaticamente en el servicio Node.js.
-3. Ejecuta la migracion inicial:
-   ```bash
-   railway run npm run migrate
-   ```
-4. Carga datos de prueba:
-   ```bash
-   railway run npm run seed
-   ```
+2. Las variables de conexión se inyectan automáticamente al servicio Node.js.
+3. La migración inicial corre como parte del `startCommand` definido en `railway.json` (`node migrate.js`).
+4. Los datos iniciales (roles, permisos, artista `cabaxx`, admin, cupón de bienvenida) corren con `node seed.js` en el mismo arranque.
 
 ### Credenciales demo (produccion)
 

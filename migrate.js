@@ -22,11 +22,18 @@ function parseMysqlUrl(urlString) {
 }
 
 function resolveConnection() {
-  const fromUrl = parseMysqlUrl(process.env.DATABASE_URL || process.env.MYSQL_URL);
+  const urlString =
+    process.env.DATABASE_URL ||
+    process.env.MYSQL_URL ||
+    process.env.MYSQL_PUBLIC_URL ||
+    process.env.MYSQLDATABASE_URL;
+  const fromUrl = parseMysqlUrl(urlString);
   if (fromUrl) {
+    const useSsl =
+      process.env.DB_SSL === 'true' || process.env.NODE_ENV === 'production';
     return {
       ...fromUrl,
-      ssl: process.env.DB_SSL === 'true' || (process.env.NODE_ENV === 'production') ? { rejectUnauthorized: false } : false,
+      ssl: useSsl ? { rejectUnauthorized: false } : false,
     };
   }
   return {
@@ -52,19 +59,51 @@ function splitSqlStatements(sql) {
 }
 
 async function ensureDatabase(cfg) {
-  const { database, ...serverCfg } = cfg;
-  const root = await mysql.createConnection({
-    ...serverCfg,
-    multipleStatements: true,
-  });
+  const root = await connectWithRetry(serverOnly(cfg));
   try {
-    console.log(`[migrate] Ensuring database \`${database}\` exists...`);
+    console.log(`[migrate] Ensuring database \`${cfg.database}\` exists...`);
     await root.query(
-      `CREATE DATABASE IF NOT EXISTS \`${database}\` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;`
+      `CREATE DATABASE IF NOT EXISTS \`${cfg.database}\` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;`
     );
   } finally {
     await root.end();
   }
+}
+
+function serverOnly(cfg) {
+  const { host, port, user, password, ssl } = cfg;
+  return { host, port, user, password, ssl };
+}
+
+function summarizeConn(cfg) {
+  return {
+    host: cfg.host,
+    port: cfg.port,
+    user: cfg.user,
+    database: cfg.database,
+    ssl: cfg.ssl ? 'enabled' : 'disabled',
+  };
+}
+
+async function connectWithRetry(cfg, { tries = 15, delayMs = 2000 } = {}) {
+  let lastErr;
+  for (let i = 1; i <= tries; i += 1) {
+    try {
+      const conn = await mysql.createConnection({
+        ...cfg,
+        multipleStatements: true,
+        connectTimeout: 8000,
+      });
+      return conn;
+    } catch (err) {
+      lastErr = err;
+      console.warn(
+        `[migrate] DB not ready (attempt ${i}/${tries}) — ${err.code || err.message}. Retrying in ${delayMs}ms…`
+      );
+      await new Promise((r) => setTimeout(r, delayMs));
+    }
+  }
+  throw lastErr;
 }
 
 async function runSqlFile(conn, filePath, label) {
@@ -93,16 +132,23 @@ async function main() {
   const cfg = resolveConnection();
   const baseDir = __dirname;
 
+  console.log('[migrate] DB target:', summarizeConn(cfg));
+
+  if (cfg.host === 'localhost' && !process.env.DB_HOST && !process.env.DATABASE_URL && !process.env.MYSQL_URL) {
+    console.error(
+      '[migrate] FATAL: no database configuration found. ' +
+      'Set one of: DATABASE_URL, MYSQL_URL, or DB_HOST/DB_PORT/DB_USER/DB_PASSWORD/DB_NAME in your service environment.'
+    );
+    process.exit(2);
+  }
+
   await ensureDatabase(cfg);
 
-  const conn = await mysql.createConnection({
-    ...cfg,
-    multipleStatements: true,
-  });
+  const conn = await connectWithRetry(cfg);
 
   let total = 0;
   try {
-    console.log('[migrate] Connecting to MySQL...');
+    console.log('[migrate] Connected. Applying schema...');
     await conn.query(`USE \`${cfg.database}\`;`);
 
     const files = [
@@ -129,4 +175,12 @@ if (require.main === module) {
   main();
 }
 
-module.exports = { main, runSqlFile, splitSqlStatements, resolveConnection, ensureDatabase };
+module.exports = {
+  main,
+  runSqlFile,
+  splitSqlStatements,
+  resolveConnection,
+  ensureDatabase,
+  connectWithRetry,
+  summarizeConn,
+};

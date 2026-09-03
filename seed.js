@@ -5,24 +5,7 @@ const fs = require('fs');
 const path = require('path');
 require('dotenv').config();
 
-const { resolveConnection, runSqlFile, splitSqlStatements, ensureDatabase } = require('./migrate');
-
-function parseMysqlUrl(urlString) {
-  if (!urlString) return null;
-  try {
-    const u = new URL(urlString);
-    if (!u.protocol.startsWith('mysql')) return null;
-    return {
-      host: u.hostname,
-      port: Number(u.port) || 3306,
-      user: decodeURIComponent(u.username),
-      password: decodeURIComponent(u.password),
-      database: u.pathname.replace(/^\//, ''),
-    };
-  } catch (e) {
-    return null;
-  }
-}
+const { resolveConnection, runSqlFile, splitSqlStatements, ensureDatabase, connectWithRetry } = require('./migrate');
 
 async function ensureAdminUser(conn, { email, name, password }) {
   const hash = await bcrypt.hash(password, 10);
@@ -39,15 +22,25 @@ async function main() {
   const cfg = resolveConnection();
   const baseDir = __dirname;
 
+  console.log('[seed] DB target:', {
+    host: cfg.host,
+    port: cfg.port,
+    user: cfg.user,
+    database: cfg.database,
+    ssl: cfg.ssl ? 'enabled' : 'disabled',
+  });
+  if (cfg.host === 'localhost' && !process.env.DB_HOST) {
+    console.warn(
+      '[seed] WARNING: connecting to localhost. Set DATABASE_URL, MYSQL_URL, or DB_HOST/DB_PORT/DB_USER/DB_PASSWORD/DB_NAME in your environment.'
+    );
+  }
+
   await ensureDatabase(cfg);
 
-  const conn = await mysql.createConnection({
-    ...cfg,
-    multipleStatements: true,
-  });
+  const conn = await connectWithRetry(cfg);
 
   try {
-    console.log('[seed] Connecting to MySQL...');
+    console.log('[seed] Connected.');
     await conn.query(`USE \`${cfg.database}\`;`);
 
     const adminEmail = process.env.ADMIN_EMAIL || 'admin@cabaxx.com';
@@ -84,4 +77,4 @@ if (require.main === module) {
   main();
 }
 
-module.exports = { main, ensureAdminUser, parseMysqlUrl, splitSqlStatements };
+module.exports = { main, ensureAdminUser, splitSqlStatements };

@@ -36,6 +36,18 @@ function resolveConnection() {
       ssl: useSsl ? { rejectUnauthorized: false } : false,
     };
   }
+
+  if (process.env.MYSQLHOST && process.env.MYSQLUSER) {
+    return {
+      host: process.env.MYSQLHOST,
+      port: Number(process.env.MYSQLPORT) || 3306,
+      user: process.env.MYSQLUSER,
+      password: process.env.MYSQLPASSWORD || '',
+      database: process.env.MYSQLDATABASE || process.env.MYSQL_DATABASE || 'railway',
+      ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
+    };
+  }
+
   return {
     host: process.env.DB_HOST || 'localhost',
     port: Number(process.env.DB_PORT) || 3306,

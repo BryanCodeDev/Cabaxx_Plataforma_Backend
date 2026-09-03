@@ -11,6 +11,7 @@ const pool = mysql.createPool({
   connectionLimit: env.db.connectionLimit,
   charset: 'utf8mb4',
   timezone: 'Z',
+  ssl: env.db.ssl ? { rejectUnauthorized: false } : undefined,
 });
 
 async function getConnection() {

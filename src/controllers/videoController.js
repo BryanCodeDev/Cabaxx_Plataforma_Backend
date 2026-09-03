@@ -1,11 +1,11 @@
 const videoService = require('../services/videoService');
-const { ok, paginated, created, noContent } = require('./controllerHelper');
+const { ok, paginatedAs, created, noContent } = require('./controllerHelper');
 
 async function list(req, res, next) {
   try {
     const { page, limit } = req.query;
     const { rows, total } = await videoService.list(req.artistId, { page, limit });
-    return paginated(res, rows, total, page, limit);
+    return paginatedAs(res, 'videos', rows, total, page, limit);
   } catch (err) {
     next(err);
   }

@@ -10,12 +10,12 @@ const { artistScopeMiddleware, requireArtistAdmin } = require('../../middlewares
 router.use(artistScopeMiddleware);
 
 // Públicas
-router.get('/', videoController.list);
-router.get('/:slug', videoController.getBySlug);
+router.get('/', videoValidation.list, validateMiddleware, videoController.list);
+router.get('/:slug', videoValidation.getBySlug, validateMiddleware, videoController.getBySlug);
 
 // artist_admin
 router.post('/', authMiddleware, requireArtistAdmin, videoValidation.createVideo, validateMiddleware, videoController.create);
 router.patch('/:id', authMiddleware, requireArtistAdmin, videoValidation.updateVideo, validateMiddleware, videoController.update);
-router.delete('/:id', authMiddleware, requireArtistAdmin, videoController.remove);
+router.delete('/:id', authMiddleware, requireArtistAdmin, videoValidation.remove, validateMiddleware, videoController.remove);
 
 module.exports = router;

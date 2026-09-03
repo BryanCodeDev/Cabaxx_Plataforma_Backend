@@ -49,10 +49,14 @@ async function me(userId) {
   return { ...sanitize(user), roles };
 }
 
-async function logout(refreshToken) {
-  if (refreshToken) {
+async function logout(refreshToken, userId) {
+  if (refreshToken && typeof refreshToken === 'string') {
     const hash = crypto.createHash('sha256').update(refreshToken).digest('hex');
     await tokenService.revokeRefreshToken(hash);
+    return;
+  }
+  if (userId) {
+    await tokenService.revokeAllForUser(userId);
   }
 }
 

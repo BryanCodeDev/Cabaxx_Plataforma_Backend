@@ -7,7 +7,9 @@ module.exports = {
     type: 'type',
     title: 'title',
     body: 'body',
-    isRead: 'is_read',
+    data: 'data_json',
+    readAt: 'read_at',
+    sentAt: 'sent_at',
     createdAt: 'created_at',
   },
 };

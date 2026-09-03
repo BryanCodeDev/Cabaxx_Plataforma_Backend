@@ -1,10 +1,10 @@
 const albumsService = require('../services/albums.service');
-const { ok, paginated, created, noContent } = require('./controllerHelper');
+const { ok, paginatedAs, created, noContent } = require('./controllerHelper');
 
 async function list(req, res, next) {
   try {
     const { rows, total } = await albumsService.getAlbums(req.artistId, req.query);
-    return paginated(res, rows, total, req.query.page, req.query.limit);
+    return paginatedAs(res, 'albums', rows, total, req.query.page, req.query.limit);
   } catch (err) {
     next(err);
   }

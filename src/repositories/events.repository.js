@@ -44,7 +44,8 @@ async function findBySlug(artistId, slug) {
   if (!event) return null;
   event.tickets = await db.query(
     `SELECT id, name, price, currency, quantity_total, quantity_sold, status, sale_start_at, sale_end_at
-     FROM ${TicketModel.tableName} WHERE event_id = ? AND quantity_sold < quantity_total`,
+     FROM ${TicketModel.tableName}
+     WHERE event_id = ? AND status = 'on_sale' AND quantity_sold < quantity_total`,
     [event.id],
   );
   return event;
@@ -107,6 +108,29 @@ async function incrementSold(ticketId, quantity) {
   return result.affectedRows > 0;
 }
 
+async function findTicketConn(conn, ticketId) {
+  const [row] = await conn.query(`SELECT * FROM ${TicketModel.tableName} WHERE id = ? FOR UPDATE`, [ticketId]);
+  return row || null;
+}
+
+async function createTicketPurchaseConn(conn, { userId, ticketId, quantity, totalPrice, status, qrCode }) {
+  const [result] = await conn.query(
+    `INSERT INTO ticket_purchases (user_id, ticket_id, quantity, total_price, status, qr_code) VALUES (?, ?, ?, ?, ?, ?)`,
+    [userId, ticketId, quantity, totalPrice, status, qrCode],
+  );
+  return result.insertId;
+}
+
+async function incrementSoldConn(conn, ticketId, quantity) {
+  const [result] = await conn.query(
+    `UPDATE ${TicketModel.tableName}
+     SET quantity_sold = quantity_sold + ?
+     WHERE id = ? AND status = 'on_sale' AND quantity_sold + ? <= quantity_total`,
+    [quantity, ticketId, quantity],
+  );
+  return result.affectedRows > 0;
+}
+
 async function findPurchaseByQr(qrCode) {
   const [row] = await db.query('SELECT * FROM ticket_purchases WHERE qr_code = ?', [qrCode]);
   return row || null;
@@ -137,4 +161,7 @@ module.exports = {
   incrementSold,
   findPurchaseByQr,
   markUsed,
+  findTicketConn,
+  createTicketPurchaseConn,
+  incrementSoldConn,
 };

@@ -12,7 +12,7 @@ router.use(artistScopeMiddleware);
 
 router.get('/', galleryValidation.list, validateMiddleware, galleryController.list);
 router.post('/reorder', authMiddleware, requireArtistAdmin, galleryValidation.reorder, validateMiddleware, galleryController.reorder);
-router.post('/', authMiddleware, requireArtistAdmin, upload.single('file'), galleryController.upload);
+router.post('/', authMiddleware, requireArtistAdmin, upload.single('file'), galleryValidation.upload, validateMiddleware, galleryController.upload);
 router.delete('/:id', authMiddleware, requireArtistAdmin, galleryValidation.remove, validateMiddleware, galleryController.remove);
 
 module.exports = router;

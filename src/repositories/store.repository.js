@@ -127,7 +127,13 @@ async function findCouponByCode(artistId, code) {
 }
 
 async function incrementCouponUses(conn, couponId) {
-  await conn.query(`UPDATE ${CouponModel.tableName} SET uses_count = uses_count + 1 WHERE id = ?`, [couponId]);
+  const [result] = await conn.query(
+    `UPDATE ${CouponModel.tableName}
+     SET uses_count = uses_count + 1
+     WHERE id = ? AND status = 'active' AND (max_uses IS NULL OR uses_count < max_uses)`,
+    [couponId],
+  );
+  return result.affectedRows > 0;
 }
 
 async function softDelete(id, artistId) {

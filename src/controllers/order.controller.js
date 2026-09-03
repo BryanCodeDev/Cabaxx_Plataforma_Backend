@@ -1,9 +1,10 @@
 const orderService = require('../services/order.service');
-const { ok, paginated, created, noContent } = require('./controllerHelper');
+const { ok, paginatedAs, created, noContent } = require('./controllerHelper');
 
 async function checkout(req, res, next) {
   try {
-    const order = await orderService.checkout(req.user.id, req.artistId, {
+    const artistId = req.artistId || req.body.artist_id;
+    const order = await orderService.checkout(req.user.id, artistId, {
       items: req.body.items,
       couponCode: req.body.coupon_code,
       shippingAddress: req.body.shipping_address,
@@ -17,7 +18,7 @@ async function checkout(req, res, next) {
 async function myOrders(req, res, next) {
   try {
     const { rows, total } = await orderService.getMyOrders(req.user.id, req.query);
-    return paginated(res, rows, total, req.query.page, req.query.limit);
+    return paginatedAs(res, 'orders', rows, total, req.query.page, req.query.limit);
   } catch (err) {
     next(err);
   }
@@ -26,7 +27,7 @@ async function myOrders(req, res, next) {
 async function artistOrders(req, res, next) {
   try {
     const { rows, total } = await orderService.getArtistOrders(req.artistId, req.query);
-    return paginated(res, rows, total, req.query.page, req.query.limit);
+    return paginatedAs(res, 'orders', rows, total, req.query.page, req.query.limit);
   } catch (err) {
     next(err);
   }

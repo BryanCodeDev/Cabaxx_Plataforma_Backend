@@ -1,5 +1,5 @@
 const newsletterService = require('../services/newsletter.service');
-const { ok, paginated, created, noContent } = require('./controllerHelper');
+const { ok, paginatedAs, created, noContent, badRequest } = require('./controllerHelper');
 
 async function subscribe(req, res, next) {
   try {
@@ -13,6 +13,7 @@ async function subscribe(req, res, next) {
 async function unsubscribe(req, res, next) {
   try {
     const { email, token } = req.query;
+    if (!email && !token) return badRequest(res, 'email o token requerido');
     const artistId = req.query.artist || (req.artist && req.artist.id);
     await newsletterService.unsubscribe(artistId, email, token);
     return ok(res, null, 'unsubscribed');
@@ -24,7 +25,7 @@ async function unsubscribe(req, res, next) {
 async function listSubscribers(req, res, next) {
   try {
     const { rows, total } = await newsletterService.listSubscribers(req.artistId, req.query);
-    return paginated(res, rows, total, req.query.page, req.query.limit);
+    return paginatedAs(res, 'subscribers', rows, total, req.query.page, req.query.limit);
   } catch (err) {
     next(err);
   }

@@ -57,7 +57,7 @@ async function checkout(userId, artistId, { items = [], couponCode, shippingAddr
       shipping,
       tax,
       total,
-      currency: resolvedItems[0]?.snapshot ? 'USD' : 'USD',
+      currency: 'COP',
       couponId,
       notes: null,
       shippingAddress,
@@ -68,14 +68,25 @@ async function checkout(userId, artistId, { items = [], couponCode, shippingAddr
     for (const item of resolvedItems) {
       await storeRepository.updateStockConn(conn, item.productId, item.quantity, 'subtract');
     }
-    if (couponId) await storeRepository.incrementCouponUses(conn, couponId);
+    if (couponId) {
+      const applied = await storeRepository.incrementCouponUses(conn, couponId);
+      if (!applied) {
+        throw new ValidationError('Cupón agotado o inactivo');
+      }
+    }
 
     const order = await orderRepository.findById(orderId);
-    await emailService.send({
-      to: shippingAddress?.email || 'fan@example.com',
-      subject: 'Confirmación de pedido',
-      html: `<p>Tu pedido #${order.id} por ${total} ha sido recibido.</p>`,
-    });
+    if (shippingAddress?.email) {
+      try {
+        await emailService.send({
+          to: shippingAddress.email,
+          subject: 'Confirmación de pedido',
+          html: `<p>Tu pedido #${order.id} por ${total} COP ha sido recibido.</p>`,
+        });
+      } catch (err) {
+        // No fallar el checkout por un fallo de email.
+      }
+    }
     return order;
   });
 }

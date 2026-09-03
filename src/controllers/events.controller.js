@@ -1,5 +1,5 @@
 const eventsService = require('../services/events.service');
-const { ok, paginated, created, noContent } = require('./controllerHelper');
+const { ok, paginatedAs, created, noContent } = require('./controllerHelper');
 
 async function upcoming(req, res, next) {
   try {
@@ -13,7 +13,7 @@ async function upcoming(req, res, next) {
 async function list(req, res, next) {
   try {
     const { rows, total } = await eventsService.getEvents(req.artistId, req.query);
-    return paginated(res, rows, total, req.query.page, req.query.limit);
+    return paginatedAs(res, 'events', rows, total, req.query.page, req.query.limit);
   } catch (err) {
     next(err);
   }

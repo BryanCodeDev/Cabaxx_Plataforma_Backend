@@ -1,11 +1,16 @@
 const paymentService = require('../services/paymentService');
-const { ok, created } = require('./controllerHelper');
+const { ok, created, badRequest } = require('./controllerHelper');
 
 async function checkout(req, res, next) {
   try {
-    const { order_id, amount, currency, provider = 'stripe' } = req.body;
-    if (!order_id) return res.status(422).json({ success: false, message: 'order_id es requerido' });
-    const result = await paymentService.checkout({ orderId: order_id, amount, currency, provider, artistId: req.artistId });
+    const { order_id, provider = 'stripe' } = req.body;
+    if (!order_id) return badRequest(res, 'order_id es requerido');
+    const result = await paymentService.checkout({
+      orderId: order_id,
+      provider,
+      userId: req.user && req.user.id,
+      artistId: req.artistId,
+    });
     return created(res, result);
   } catch (err) {
     next(err);
@@ -14,7 +19,16 @@ async function checkout(req, res, next) {
 
 async function webhook(req, res, next) {
   try {
-    const result = await paymentService.handleWebhook(req.body);
+    let payload = req.body;
+    if (Buffer.isBuffer(req.body)) {
+      try {
+        payload = JSON.parse(req.body.toString('utf8'));
+      } catch (_) {
+        payload = {};
+      }
+    }
+    const signature = req.get('x-signature') || req.get('stripe-signature') || req.get('x-mp-signature');
+    const result = await paymentService.handleWebhook(payload, signature);
     return ok(res, result);
   } catch (err) {
     next(err);
@@ -24,7 +38,7 @@ async function webhook(req, res, next) {
 async function success(req, res, next) {
   try {
     const { order_id } = req.query;
-    if (!order_id) return res.status(422).json({ success: false, message: 'order_id requerido' });
+    if (!order_id) return badRequest(res, 'order_id requerido');
     const payment = await paymentService.getPaymentByOrder(order_id);
     return ok(res, { status: 'success', payment });
   } catch (err) {

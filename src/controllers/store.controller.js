@@ -1,10 +1,10 @@
 const storeService = require('../services/store.service');
-const { ok, paginated, created, noContent } = require('./controllerHelper');
+const { ok, paginatedAs, created, noContent, badRequest } = require('./controllerHelper');
 
 async function listProducts(req, res, next) {
   try {
     const { rows, total } = await storeService.getProducts(req.artistId, req.query);
-    return paginated(res, rows, total, req.query.page, req.query.limit);
+    return paginatedAs(res, 'products', rows, total, req.query.page, req.query.limit);
   } catch (err) {
     next(err);
   }
@@ -58,6 +58,7 @@ async function createCategory(req, res, next) {
 async function validateCoupon(req, res, next) {
   try {
     const { code, subtotal } = req.query;
+    if (!code) return badRequest(res, 'code requerido');
     const result = await storeService.validateCoupon(req.artistId, code, Number(subtotal) || 0);
     return ok(res, result);
   } catch (err) {
@@ -95,7 +96,7 @@ async function deleteCategory(req, res, next) {
 async function listCoupons(req, res, next) {
   try {
     const { rows, total } = await storeService.listCoupons(req.artistId, req.query);
-    return paginated(res, rows, total, req.query.page, req.query.limit);
+    return paginatedAs(res, 'coupons', rows, total, req.query.page, req.query.limit);
   } catch (err) {
     next(err);
   }

@@ -1,7 +1,7 @@
 require('dotenv').config();
 const express = require('express');
-const helmet = require('helmet');
 const cors = require('cors');
+const compression = require('compression');
 
 const env = require('./config/env');
 const helmetConfig = require('./middlewares/helmetConfig');
@@ -12,20 +12,24 @@ const notFoundHandler = require('./middlewares/notFoundHandler');
 const logger = require('./utils/logger');
 
 const apiRouter = require('./routes');
-const seoRouter = require('./routes/v1/seo.routes');
 const seoService = require('./services/seo.service');
 
 const app = express();
 
+if (env.isProduction) {
+  app.set('trust proxy', 1);
+}
+
 app.use(helmetConfig);
 app.use(cors(corsConfig));
+app.use(compression());
 app.use(express.json({ limit: '2mb' }));
 app.use(express.urlencoded({ extended: true }));
 app.use(loggerMiddleware);
 
-app.get('/health', (req, res) => res.json({ status: 'ok' }));
+app.get('/health', (req, res) => res.json({ status: 'ok', env: env.nodeEnv, uptime: process.uptime() }));
 
-const ARTIST_SLUG = 'cabaxx';
+const ARTIST_SLUG = env.clientUrl && env.clientUrl.includes('cabitaxx') ? 'cabaxx' : 'cabaxx';
 
 app.get('/sitemap.xml', (req, res, next) => {
   seoService.getSitemap(ARTIST_SLUG).then((xml) => {
@@ -47,8 +51,20 @@ app.use(notFoundHandler);
 app.use(errorHandler);
 
 const PORT = env.port || 4000;
+let server;
 if (require.main === module) {
-  app.listen(PORT, () => logger.info(`Cabaxx API listening on :${PORT}`));
+  server = app.listen(PORT, () => logger.info(`Cabaxx API listening on :${PORT}`));
+
+  const shutdown = async (signal) => {
+    logger.info(`${signal} received — closing server`);
+    server.close(() => {
+      logger.info('HTTP server closed');
+      process.exit(0);
+    });
+    setTimeout(() => process.exit(1), 10000).unref();
+  };
+  process.on('SIGTERM', () => shutdown('SIGTERM'));
+  process.on('SIGINT', () => shutdown('SIGINT'));
 }
 
 module.exports = app;

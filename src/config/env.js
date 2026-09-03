@@ -12,10 +12,26 @@ const required = [
 ];
 
 const missing = required.filter((key) => !process.env[key]);
+const isProd = (process.env.NODE_ENV || 'development') === 'production';
 
-if (missing.length && process.env.NODE_ENV !== 'test') {
+if (missing.length) {
   // eslint-disable-next-line no-console
   console.warn(`[env] Missing recommended variables: ${missing.join(', ')}`);
+}
+
+if (isProd) {
+  const weakSecrets = [];
+  if (!process.env.JWT_ACCESS_SECRET || process.env.JWT_ACCESS_SECRET.length < 32) {
+    weakSecrets.push('JWT_ACCESS_SECRET (must be >= 32 chars)');
+  }
+  if (!process.env.JWT_REFRESH_SECRET || process.env.JWT_REFRESH_SECRET.length < 32) {
+    weakSecrets.push('JWT_REFRESH_SECRET (must be >= 32 chars)');
+  }
+  if (weakSecrets.length) {
+    // eslint-disable-next-line no-console
+    console.error(`[env] Insecure configuration in production: ${weakSecrets.join('; ')}`);
+    process.exit(1);
+  }
 }
 
 const env = {

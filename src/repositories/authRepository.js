@@ -23,7 +23,7 @@ async function findById(id) {
 }
 
 async function create({ email, passwordHash, name }) {
-  const result = await db.query(
+  const [result] = await db.query(
     `INSERT INTO ${UserModel.tableName} (name, email, password_hash, status)
      VALUES (?, ?, ?, ?)`,
     [name, email, passwordHash, 'active'],
@@ -36,4 +36,30 @@ async function updatePassword(id, passwordHash) {
   return findById(id);
 }
 
-module.exports = { findByEmail, findById, findRolesByUserId, create, updatePassword };
+async function createPasswordReset(email, tokenHash) {
+  await db.query(
+    `INSERT INTO password_resets (email, token_hash, expires_at)
+     VALUES (?, ?, DATE_ADD(NOW(), INTERVAL 1 HOUR))`,
+    [email, tokenHash],
+  );
+}
+
+async function findPasswordReset(tokenHash) {
+  const [row] = await db.query(
+    `SELECT * FROM password_resets WHERE token_hash = ? ORDER BY id DESC LIMIT 1`,
+    [tokenHash],
+  );
+  return row || null;
+}
+
+async function markPasswordResetUsed(tokenHash) {
+  await db.query(
+    `UPDATE password_resets SET used_at = NOW() WHERE token_hash = ? AND used_at IS NULL`,
+    [tokenHash],
+  );
+}
+
+module.exports = {
+  findByEmail, findById, findRolesByUserId, create, updatePassword,
+  createPasswordReset, findPasswordReset, markPasswordResetUsed,
+};

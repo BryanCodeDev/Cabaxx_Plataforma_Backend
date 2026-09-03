@@ -535,6 +535,7 @@ CREATE TABLE orders (
   KEY idx_orders_user (user_id),
   KEY idx_orders_status (artist_id, status),
   KEY idx_orders_created (artist_id, created_at),
+  KEY idx_orders_user_created (user_id, created_at),
   CONSTRAINT fk_order_user FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE SET NULL ON UPDATE CASCADE,
   CONSTRAINT fk_order_artist FOREIGN KEY (artist_id) REFERENCES artists (id) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT fk_order_coupon FOREIGN KEY (coupon_id) REFERENCES coupons (id) ON DELETE SET NULL ON UPDATE CASCADE

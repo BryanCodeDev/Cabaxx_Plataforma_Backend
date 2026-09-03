@@ -33,12 +33,12 @@ async function purchaseTicket(userId, ticketId, quantity) {
   const ticket = await eventsRepository.findTicket(ticketId);
   if (!ticket) throw new NotFoundError('Ticket not found');
   if (ticket.status !== 'on_sale') throw new ConflictError('Ticket not on sale');
-  if (ticket.quantity_sold + quantity > ticket.quantity_total) {
-    throw new ValidationError('Not enough stock', [{ field: 'quantity', message: 'Stock insuficiente' }]);
-  }
   const now = new Date();
   if (ticket.sale_start_at && new Date(ticket.sale_start_at) > now) throw new ConflictError('Sale not started');
   if (ticket.sale_end_at && new Date(ticket.sale_end_at) < now) throw new ConflictError('Sale ended');
+  if (ticket.quantity_sold + quantity > ticket.quantity_total) {
+    throw new ValidationError('Not enough stock', [{ field: 'quantity', message: 'Stock insuficiente' }]);
+  }
 
   const totalPrice = Number(ticket.price) * quantity;
   const qrCode = crypto.randomBytes(16).toString('hex');
@@ -50,7 +50,10 @@ async function purchaseTicket(userId, ticketId, quantity) {
     status: 'paid',
     qrCode,
   });
-  await eventsRepository.incrementSold(ticketId, quantity);
+  const reserved = await eventsRepository.incrementSold(ticketId, quantity);
+  if (!reserved) {
+    throw new ValidationError('Not enough stock', [{ field: 'quantity', message: 'Stock insuficiente' }]);
+  }
   return { purchaseId, qrCode, totalPrice };
 }
 

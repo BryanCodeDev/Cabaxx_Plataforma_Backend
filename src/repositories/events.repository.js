@@ -98,7 +98,13 @@ async function createTicketPurchase({ userId, ticketId, quantity, totalPrice, st
 }
 
 async function incrementSold(ticketId, quantity) {
-  await db.query(`UPDATE ${TicketModel.tableName} SET quantity_sold = quantity_sold + ? WHERE id = ?`, [quantity, ticketId]);
+  const [result] = await db.query(
+    `UPDATE ${TicketModel.tableName}
+     SET quantity_sold = quantity_sold + ?
+     WHERE id = ? AND status = 'on_sale' AND quantity_sold + ? <= quantity_total`,
+    [quantity, ticketId, quantity],
+  );
+  return result.affectedRows > 0;
 }
 
 async function findPurchaseByQr(qrCode) {

@@ -99,9 +99,8 @@ async function updateStockConn(conn, productId, quantity, operation) {
     );
     if (result.affectedRows === 0) {
       const [row] = await conn.query(`SELECT name, stock_quantity FROM ${ProductModel.tableName} WHERE id = ?`, [productId]);
-      const err = new Error(`Solo quedan ${row ? row.stock_quantity : 0} unidades de ${row ? row.name : 'este producto'}`);
-      err.code = 'INSUFFICIENT_STOCK';
-      throw err;
+      const { ValidationError } = require('../exceptions');
+      throw new ValidationError(`Solo quedan ${row ? row.stock_quantity : 0} unidades de ${row ? row.name : 'este producto'}`);
     }
   } else {
     await conn.query(`UPDATE ${ProductModel.tableName} SET stock_quantity = stock_quantity + ? WHERE id = ?`, [quantity, productId]);

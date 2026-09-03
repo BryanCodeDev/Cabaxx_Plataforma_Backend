@@ -20,7 +20,7 @@ artistEvents.delete('/:id', authMiddleware, requireArtistAdmin, eventsController
 // Tickets
 const tickets = express.Router();
 tickets.post('/:id/purchase', authMiddleware, eventsValidation.purchase, validateMiddleware, eventsController.purchase);
-tickets.get('/verify/:qr_code', eventsValidation.verify, validateMiddleware, eventsController.verify);
+tickets.get('/verify/:qr_code', authMiddleware, requireArtistAdmin, eventsValidation.verify, validateMiddleware, eventsController.verify);
 
 module.exports = { artistEvents, tickets };
 

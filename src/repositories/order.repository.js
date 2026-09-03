@@ -39,16 +39,27 @@ async function findOrdersByUser(userId, { page = 1, limit = 20, status } = {}) {
   const [{ total }] = await db.query(`SELECT COUNT(*) AS total FROM ${OrderModel.tableName} ${clause}`, params);
   const offset = (parseInt(page, 10) - 1) * parseInt(limit, 10);
   const rows = await db.query(`SELECT * FROM ${OrderModel.tableName} ${clause} ORDER BY created_at DESC LIMIT ? OFFSET ?`, [...params, parseInt(limit, 10), offset]);
+  if (!rows.length) return { rows, total };
+  const orderIds = rows.map((o) => o.id);
+  const placeholders = orderIds.map(() => '?').join(',');
+  const items = await db.query(
+    `SELECT order_id, product_id, quantity, unit_price, snapshot_json
+     FROM ${OrderItemModel.tableName} WHERE order_id IN (${placeholders})`,
+    orderIds,
+  );
+  const byOrder = new Map();
+  for (const item of items) {
+    const snapshot = JSON.parse(item.snapshot_json || '{}');
+    const shaped = {
+      name: snapshot.name || `Producto #${item.product_id}`,
+      qty: item.quantity,
+      price: Number(item.unit_price),
+    };
+    if (!byOrder.has(item.order_id)) byOrder.set(item.order_id, []);
+    byOrder.get(item.order_id).push(shaped);
+  }
   for (const order of rows) {
-    const items = await db.query(`SELECT * FROM ${OrderItemModel.tableName} WHERE order_id = ?`, [order.id]);
-    order.items = items.map((item) => {
-      const snapshot = JSON.parse(item.snapshot_json || '{}');
-      return {
-        name: snapshot.name || `Producto #${item.product_id}`,
-        qty: item.quantity,
-        price: Number(item.unit_price),
-      };
-    });
+    order.items = byOrder.get(order.id) || [];
   }
   return { rows, total };
 }

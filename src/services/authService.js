@@ -18,9 +18,9 @@ async function register({ email, password, name, role = 'user', artistId = null 
 
 async function login({ email, password }) {
   const user = await authRepository.findByEmail(email);
-  if (!user || user.status !== 'active') throw new UnauthorizedError('Invalid credentials');
-  const ok = await comparePassword(password, user.password_hash);
-  if (!ok) throw new UnauthorizedError('Invalid credentials');
+  const hash = user?.password_hash || '$2b$10$....................................................';
+  const ok = await comparePassword(password, hash);
+  if (!user || !ok || user.status !== 'active') throw new UnauthorizedError('Invalid credentials');
   const roles = await authRepository.findRolesByUserId(user.id);
   const { role, artistId } = resolvePrimaryRole(roles);
   const tokens = issueTokens({ ...user, role, artistId });
@@ -62,17 +62,34 @@ async function logoutAll(userId) {
 
 async function forgotPassword(email) {
   const user = await authRepository.findByEmail(email);
-  if (!user) throw new NotFoundError('Email not registered');
-  const link = `${env.clientUrl}/reset-password?token=${crypto.randomBytes(20).toString('hex')}`;
-  await emailService.send({ to: email, subject: 'Restablecer contraseña', html: resetPasswordTemplate(user.first_name, link) });
+  if (!user) return { ok: true };
+  const rawToken = crypto.randomBytes(32).toString('hex');
+  const tokenHash = crypto.createHash('sha256').update(rawToken).digest('hex');
+  await authRepository.createPasswordReset(email, tokenHash);
+  const link = `${env.clientUrl}/reset-password?token=${rawToken}`;
+  await emailService.send({ to: email, subject: 'Restablecer contraseña', html: resetPasswordTemplate(user.name, link) });
+  return { ok: true };
 }
 
 async function resetPassword(token, password) {
+  if (!token || typeof token !== 'string') throw new UnauthorizedError('Invalid token');
+  const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
+  const row = await authRepository.findPasswordReset(tokenHash);
+  if (!row || row.used_at || new Date(row.expires_at).getTime() < Date.now()) {
+    throw new UnauthorizedError('Invalid or expired token');
+  }
+  const user = await authRepository.findByEmail(row.email);
+  if (!user) throw new UnauthorizedError('Invalid token');
+  const passwordHash = await hashPassword(password);
+  await authRepository.updatePassword(user.id, passwordHash);
+  await authRepository.markPasswordResetUsed(tokenHash);
   return { reset: true };
 }
 
 function sanitize(user) {
-  const { password_hash, ...rest } = user;
+  if (!user) return user;
+  const { password_hash: _ignored, ...rest } = user;
+  void _ignored;
   return rest;
 }
 

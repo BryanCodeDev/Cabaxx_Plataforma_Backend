@@ -326,6 +326,20 @@ async function runSqlFile(
         `${statement.length > 100 ? '...' : ''}`
       );
     } catch (error) {
+      const benign =
+        error.code === 'ER_TABLE_EXISTS_ERROR' ||
+        error.code === 'ER_DUP_KEYNAME' ||
+        error.code === 'ER_DUP_ENTRY' ||
+        error.code === 'ER_FK_DUP_NAME';
+
+      if (benign) {
+        applied += 1;
+        console.log(
+          `  ~ ${head} (skipped: ${error.code})`
+        );
+        continue;
+      }
+
       console.error(
         `  ✗ ${head} → ` +
         `${error.code || error.message}`
@@ -345,24 +359,20 @@ async function runSqlFile(
  */
 
 function validateConfiguration() {
-  const required = [
-    'DB_HOST',
-    'DB_PORT',
-    'DB_USER',
-    'DB_PASSWORD',
-    'DB_NAME',
-  ];
+  const hasUrl = process.env.DATABASE_URL || process.env.MYSQL_URL;
+  const hasMysqlVars = process.env.MYSQLHOST && (process.env.MYSQLUSER || process.env.MYSQL_ROOT_PASSWORD);
+  const hasDbVars = process.env.DB_HOST && process.env.DB_USER;
 
-  const missing = required.filter(
-    (key) => !process.env[key]
-  );
-
-  if (missing.length > 0) {
-    throw new Error(
-      `Missing required database variables: ` +
-      `${missing.join(', ')}`
-    );
+  if (hasUrl || hasMysqlVars || hasDbVars) {
+    return;
   }
+
+  throw new Error(
+    `Missing database configuration. Set one of:\n` +
+    `  - DATABASE_URL (recommended): mysql://user:pass@host:3306/db\n` +
+    `  - MYSQL_URL / MYSQL_URL style variables (Railway MySQL plugin)\n` +
+    `  - DB_HOST + DB_USER + DB_PASSWORD + DB_NAME (local dev)`
+  );
 }
 
 /**

@@ -1,11 +1,11 @@
-CREATE DATABASE IF NOT EXISTS map_platform CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+﻿CREATE DATABASE IF NOT EXISTS map_platform CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 USE map_platform;
 
 -- ============================================================
--- GRUPO 1 — SISTEMA Y AUTENTICACIÓN
+-- GRUPO 1 â€” SISTEMA Y AUTENTICACIÃ“N
 -- ============================================================
 
-CREATE TABLE users (
+CREATE TABLE IF NOT EXISTS users (
   id                BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
   name             VARCHAR(150) NOT NULL,
   email            VARCHAR(191) NOT NULL,
@@ -18,7 +18,7 @@ CREATE TABLE users (
   UNIQUE KEY uk_users_email (email)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Usuarios del sistema (fans, admins, superadmin)';
 
-CREATE TABLE roles (
+CREATE TABLE IF NOT EXISTS roles (
   id          SMALLINT UNSIGNED NOT NULL AUTO_INCREMENT,
   name        VARCHAR(100) NOT NULL,
   slug        VARCHAR(100) NOT NULL,
@@ -29,7 +29,7 @@ CREATE TABLE roles (
   UNIQUE KEY uk_roles_slug (slug)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Roles del sistema (superadmin, artist_admin, user, guest)';
 
-CREATE TABLE permissions (
+CREATE TABLE IF NOT EXISTS permissions (
   id          SMALLINT UNSIGNED NOT NULL AUTO_INCREMENT,
   name        VARCHAR(100) NOT NULL,
   slug        VARCHAR(120) NOT NULL,
@@ -40,9 +40,9 @@ CREATE TABLE permissions (
   PRIMARY KEY (id),
   UNIQUE KEY uk_permissions_slug (slug),
   KEY idx_permissions_module (module)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Permisos granulares por módulo';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Permisos granulares por mÃ³dulo';
 
-CREATE TABLE role_permissions (
+CREATE TABLE IF NOT EXISTS role_permissions (
   role_id       SMALLINT UNSIGNED NOT NULL,
   permission_id SMALLINT UNSIGNED NOT NULL,
   created_at    TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -50,9 +50,9 @@ CREATE TABLE role_permissions (
   KEY idx_rp_permission (permission_id),
   CONSTRAINT fk_rp_role FOREIGN KEY (role_id) REFERENCES roles (id) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT fk_rp_permission FOREIGN KEY (permission_id) REFERENCES permissions (id) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Relación N:N roles-permisos';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='RelaciÃ³n N:N roles-permisos';
 
-CREATE TABLE refresh_tokens (
+CREATE TABLE IF NOT EXISTS refresh_tokens (
   id          BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
   user_id     BIGINT UNSIGNED NOT NULL,
   token_hash  VARCHAR(255) NOT NULL,
@@ -68,7 +68,7 @@ CREATE TABLE refresh_tokens (
   CONSTRAINT fk_refresh_user FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Refresh tokens rotatorios para JWT';
 
-CREATE TABLE sessions (
+CREATE TABLE IF NOT EXISTS sessions (
   id          BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
   user_id     BIGINT UNSIGNED NOT NULL,
   token_hash  VARCHAR(255) NOT NULL,
@@ -82,7 +82,7 @@ CREATE TABLE sessions (
   CONSTRAINT fk_session_user FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Sesiones activas del usuario';
 
-CREATE TABLE password_resets (
+CREATE TABLE IF NOT EXISTS password_resets (
   id          BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
   email       VARCHAR(191) NOT NULL,
   token_hash  VARCHAR(255) NOT NULL,
@@ -92,17 +92,17 @@ CREATE TABLE password_resets (
   PRIMARY KEY (id),
   KEY idx_pr_email (email),
   KEY idx_pr_token (token_hash)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Tokens de reseteo de contraseña';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Tokens de reseteo de contraseÃ±a';
 
--- Índices adicionales Grupo 1
+-- Ãndices adicionales Grupo 1
 CREATE INDEX idx_users_status ON users (status);
 CREATE INDEX idx_users_created ON users (created_at);
 
 -- ============================================================
--- GRUPO 2 — ARTISTA PRINCIPAL (Cabaxx)
+-- GRUPO 2 â€” ARTISTA PRINCIPAL (Cabaxx)
 -- ============================================================
 
-CREATE TABLE artists (
+CREATE TABLE IF NOT EXISTS artists (
   id           BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
   slug         VARCHAR(160) NOT NULL,
   stage_name   VARCHAR(150) NOT NULL,
@@ -122,7 +122,7 @@ CREATE TABLE artists (
   UNIQUE KEY uk_artists_slug (slug)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Artista principal (Cabaxx)';
 
-CREATE TABLE user_roles (
+CREATE TABLE IF NOT EXISTS user_roles (
   id        BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
   user_id   BIGINT UNSIGNED NOT NULL,
   role_id   SMALLINT UNSIGNED NOT NULL,
@@ -137,7 +137,7 @@ CREATE TABLE user_roles (
   CONSTRAINT fk_ur_artist FOREIGN KEY (artist_id) REFERENCES artists (id) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Un usuario puede ser admin del artista principal';
 
-CREATE TABLE artist_social_links (
+CREATE TABLE IF NOT EXISTS artist_social_links (
   id             BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
   artist_id      BIGINT UNSIGNED NOT NULL,
   platform       VARCHAR(40) NOT NULL COMMENT 'spotify, youtube, instagram, etc.',
@@ -152,7 +152,7 @@ CREATE TABLE artist_social_links (
   CONSTRAINT fk_asl_artist FOREIGN KEY (artist_id) REFERENCES artists (id) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Enlaces sociales por artista';
 
-CREATE TABLE artist_themes (
+CREATE TABLE IF NOT EXISTS artist_themes (
   id               BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
   artist_id        BIGINT UNSIGNED NOT NULL,
   primary_color    VARCHAR(7) DEFAULT '#111111',
@@ -168,7 +168,7 @@ CREATE TABLE artist_themes (
   CONSTRAINT fk_theme_artist FOREIGN KEY (artist_id) REFERENCES artists (id) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Tema visual del artista';
 
-CREATE TABLE artist_seo (
+CREATE TABLE IF NOT EXISTS artist_seo (
   id             BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
   artist_id      BIGINT UNSIGNED NOT NULL,
   meta_title     VARCHAR(160) DEFAULT NULL,
@@ -184,7 +184,7 @@ CREATE TABLE artist_seo (
   CONSTRAINT fk_seo_artist FOREIGN KEY (artist_id) REFERENCES artists (id) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Metadatos SEO por artista';
 
-CREATE TABLE artist_settings (
+CREATE TABLE IF NOT EXISTS artist_settings (
   id         BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
   artist_id  BIGINT UNSIGNED NOT NULL,
   `key`      VARCHAR(100) NOT NULL,
@@ -198,7 +198,7 @@ CREATE TABLE artist_settings (
   CONSTRAINT fk_settings_artist FOREIGN KEY (artist_id) REFERENCES artists (id) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Configuraciones clave-valor del artista';
 
-CREATE TABLE artist_domains (
+CREATE TABLE IF NOT EXISTS artist_domains (
   id           BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
   artist_id    BIGINT UNSIGNED NOT NULL,
   domain       VARCHAR(255) NOT NULL,
@@ -214,10 +214,10 @@ CREATE TABLE artist_domains (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Dominios personalizados del artista';
 
 -- ============================================================
--- GRUPO 3 — MÚSICA
+-- GRUPO 3 â€” MÃšSICA
 -- ============================================================
 
-CREATE TABLE songs (
+CREATE TABLE IF NOT EXISTS songs (
   id              BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
   artist_id       BIGINT UNSIGNED NOT NULL,
   title           VARCHAR(200) NOT NULL,
@@ -242,7 +242,7 @@ CREATE TABLE songs (
   CONSTRAINT fk_song_artist FOREIGN KEY (artist_id) REFERENCES artists (id) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Canciones del artista';
 
-CREATE TABLE albums (
+CREATE TABLE IF NOT EXISTS albums (
   id           BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
   artist_id    BIGINT UNSIGNED NOT NULL,
   title        VARCHAR(200) NOT NULL,
@@ -259,9 +259,9 @@ CREATE TABLE albums (
   UNIQUE KEY uk_albums_artist_slug (artist_id, slug),
   KEY idx_albums_artist_status (artist_id, status),
   CONSTRAINT fk_album_artist FOREIGN KEY (artist_id) REFERENCES artists (id) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Álbumes del artista';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Ãlbumes del artista';
 
-CREATE TABLE album_songs (
+CREATE TABLE IF NOT EXISTS album_songs (
   album_id     BIGINT UNSIGNED NOT NULL,
   song_id      BIGINT UNSIGNED NOT NULL,
   track_number SMALLINT UNSIGNED NOT NULL DEFAULT 1,
@@ -271,9 +271,9 @@ CREATE TABLE album_songs (
   KEY idx_album_songs_song (song_id),
   CONSTRAINT fk_as_album FOREIGN KEY (album_id) REFERENCES albums (id) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT fk_as_song FOREIGN KEY (song_id) REFERENCES songs (id) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Orden de canciones en álbum';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Orden de canciones en Ã¡lbum';
 
-CREATE TABLE song_streaming_links (
+CREATE TABLE IF NOT EXISTS song_streaming_links (
   id        BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
   song_id   BIGINT UNSIGNED NOT NULL,
   platform  VARCHAR(40) NOT NULL,
@@ -283,9 +283,9 @@ CREATE TABLE song_streaming_links (
   KEY idx_ssl_song (song_id),
   KEY idx_ssl_song_platform (song_id, platform),
   CONSTRAINT fk_ssl_song FOREIGN KEY (song_id) REFERENCES songs (id) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Enlaces de streaming por canción';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Enlaces de streaming por canciÃ³n';
 
-CREATE TABLE song_tags (
+CREATE TABLE IF NOT EXISTS song_tags (
   id     BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
   song_id BIGINT UNSIGNED NOT NULL,
   tag    VARCHAR(60) NOT NULL,
@@ -293,13 +293,13 @@ CREATE TABLE song_tags (
   UNIQUE KEY uk_song_tag (song_id, tag),
   KEY idx_songtags_tag (tag),
   CONSTRAINT fk_st_song FOREIGN KEY (song_id) REFERENCES songs (id) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Etiquetas de canción';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Etiquetas de canciÃ³n';
 
 -- ============================================================
--- GRUPO 4 — VIDEO Y MULTIMEDIA
+-- GRUPO 4 â€” VIDEO Y MULTIMEDIA
 -- ============================================================
 
-CREATE TABLE videos (
+CREATE TABLE IF NOT EXISTS videos (
   id                BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
   artist_id         BIGINT UNSIGNED NOT NULL,
   title             VARCHAR(200) NOT NULL,
@@ -322,7 +322,7 @@ CREATE TABLE videos (
   CONSTRAINT fk_video_artist FOREIGN KEY (artist_id) REFERENCES artists (id) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Videoclips y multimedia';
 
-CREATE TABLE gallery_items (
+CREATE TABLE IF NOT EXISTS gallery_items (
   id           BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
   artist_id    BIGINT UNSIGNED NOT NULL,
   title        VARCHAR(200) DEFAULT NULL,
@@ -339,13 +339,13 @@ CREATE TABLE gallery_items (
   KEY idx_gallery_artist (artist_id),
   KEY idx_gallery_artist_cat (artist_id, category, sort_order),
   CONSTRAINT fk_gallery_artist FOREIGN KEY (artist_id) REFERENCES artists (id) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Galería de imágenes/videos';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='GalerÃ­a de imÃ¡genes/videos';
 
 -- ============================================================
--- GRUPO 5 — EVENTOS
+-- GRUPO 5 â€” EVENTOS
 -- ============================================================
 
-CREATE TABLE events (
+CREATE TABLE IF NOT EXISTS events (
   id             BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
   artist_id      BIGINT UNSIGNED NOT NULL,
   title          VARCHAR(200) NOT NULL,
@@ -375,7 +375,7 @@ CREATE TABLE events (
   CONSTRAINT fk_event_artist FOREIGN KEY (artist_id) REFERENCES artists (id) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Eventos y conciertos';
 
-CREATE TABLE tickets (
+CREATE TABLE IF NOT EXISTS tickets (
   id            BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
   event_id      BIGINT UNSIGNED NOT NULL,
   artist_id     BIGINT UNSIGNED NOT NULL,
@@ -398,7 +398,7 @@ CREATE TABLE tickets (
   CONSTRAINT fk_ticket_artist FOREIGN KEY (artist_id) REFERENCES artists (id) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Tipos de ticket por evento';
 
-CREATE TABLE ticket_purchases (
+CREATE TABLE IF NOT EXISTS ticket_purchases (
   id          BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
   user_id     BIGINT UNSIGNED NOT NULL,
   ticket_id   BIGINT UNSIGNED NOT NULL,
@@ -418,10 +418,10 @@ CREATE TABLE ticket_purchases (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Compras de tickets';
 
 -- ============================================================
--- GRUPO 6 — TIENDA Y ECOMMERCE
+-- GRUPO 6 â€” TIENDA Y ECOMMERCE
 -- ============================================================
 
-CREATE TABLE product_categories (
+CREATE TABLE IF NOT EXISTS product_categories (
   id          BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
   artist_id   BIGINT UNSIGNED NOT NULL,
   name        VARCHAR(150) NOT NULL,
@@ -438,9 +438,9 @@ CREATE TABLE product_categories (
   KEY idx_cat_artist_parent (artist_id, parent_id, sort_order),
   CONSTRAINT fk_cat_artist FOREIGN KEY (artist_id) REFERENCES artists (id) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT fk_cat_parent FOREIGN KEY (parent_id) REFERENCES product_categories (id) ON DELETE SET NULL ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Categorías de productos (auto-referencial)';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='CategorÃ­as de productos (auto-referencial)';
 
-CREATE TABLE products (
+CREATE TABLE IF NOT EXISTS products (
   id              BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
   artist_id       BIGINT UNSIGNED NOT NULL,
   category_id     BIGINT UNSIGNED DEFAULT NULL,
@@ -467,7 +467,7 @@ CREATE TABLE products (
   CONSTRAINT fk_prod_category FOREIGN KEY (category_id) REFERENCES product_categories (id) ON DELETE SET NULL ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Productos de la tienda';
 
-CREATE TABLE product_images (
+CREATE TABLE IF NOT EXISTS product_images (
   id         BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
   product_id BIGINT UNSIGNED NOT NULL,
   url        VARCHAR(512) NOT NULL,
@@ -477,9 +477,9 @@ CREATE TABLE product_images (
   PRIMARY KEY (id),
   KEY idx_pi_product (product_id, sort_order),
   CONSTRAINT fk_pi_product FOREIGN KEY (product_id) REFERENCES products (id) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Imágenes de producto';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='ImÃ¡genes de producto';
 
-CREATE TABLE product_variants (
+CREATE TABLE IF NOT EXISTS product_variants (
   id             BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
   product_id     BIGINT UNSIGNED NOT NULL,
   name           VARCHAR(150) NOT NULL,
@@ -494,7 +494,7 @@ CREATE TABLE product_variants (
   CONSTRAINT fk_pv_product FOREIGN KEY (product_id) REFERENCES products (id) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Variantes de producto';
 
-CREATE TABLE coupons (
+CREATE TABLE IF NOT EXISTS coupons (
   id           BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
   artist_id    BIGINT UNSIGNED NOT NULL,
   code         VARCHAR(50) NOT NULL,
@@ -514,7 +514,7 @@ CREATE TABLE coupons (
   CONSTRAINT fk_coupon_artist FOREIGN KEY (artist_id) REFERENCES artists (id) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Cupones de descuento';
 
-CREATE TABLE orders (
+CREATE TABLE IF NOT EXISTS orders (
   id          BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
   user_id     BIGINT UNSIGNED DEFAULT NULL,
   artist_id   BIGINT UNSIGNED NOT NULL,
@@ -541,7 +541,7 @@ CREATE TABLE orders (
   CONSTRAINT fk_order_coupon FOREIGN KEY (coupon_id) REFERENCES coupons (id) ON DELETE SET NULL ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Pedidos de la tienda';
 
-CREATE TABLE order_items (
+CREATE TABLE IF NOT EXISTS order_items (
   id            BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
   order_id      BIGINT UNSIGNED NOT NULL,
   product_id    BIGINT UNSIGNED DEFAULT NULL,
@@ -559,7 +559,7 @@ CREATE TABLE order_items (
   CONSTRAINT fk_oi_variant FOREIGN KEY (variant_id) REFERENCES product_variants (id) ON DELETE SET NULL ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Items de pedido';
 
-CREATE TABLE order_shipping (
+CREATE TABLE IF NOT EXISTS order_shipping (
   id              BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
   order_id        BIGINT UNSIGNED NOT NULL,
   carrier         VARCHAR(80) DEFAULT NULL,
@@ -573,9 +573,9 @@ CREATE TABLE order_shipping (
   PRIMARY KEY (id),
   UNIQUE KEY uk_os_order (order_id),
   CONSTRAINT fk_os_order FOREIGN KEY (order_id) REFERENCES orders (id) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Envíos de pedidos';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='EnvÃ­os de pedidos';
 
-CREATE TABLE payments (
+CREATE TABLE IF NOT EXISTS payments (
   id            BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
   order_id      BIGINT UNSIGNED NOT NULL,
   user_id       BIGINT UNSIGNED DEFAULT NULL,
@@ -600,10 +600,10 @@ CREATE TABLE payments (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Pagos de pedidos';
 
 -- ============================================================
--- GRUPO 7 — COMUNIDAD
+-- GRUPO 7 â€” COMUNIDAD
 -- ============================================================
 
-CREATE TABLE posts (
+CREATE TABLE IF NOT EXISTS posts (
   id           BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
   artist_id    BIGINT UNSIGNED NOT NULL,
   user_id      BIGINT UNSIGNED DEFAULT NULL,
@@ -627,7 +627,7 @@ CREATE TABLE posts (
   CONSTRAINT fk_post_user FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE SET NULL ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Blog, noticias y updates';
 
-CREATE TABLE post_tags (
+CREATE TABLE IF NOT EXISTS post_tags (
   id      BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
   post_id BIGINT UNSIGNED NOT NULL,
   tag     VARCHAR(60) NOT NULL,
@@ -637,7 +637,7 @@ CREATE TABLE post_tags (
   CONSTRAINT fk_pt_post FOREIGN KEY (post_id) REFERENCES posts (id) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Etiquetas de posts';
 
-CREATE TABLE comments (
+CREATE TABLE IF NOT EXISTS comments (
   id              BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
   user_id         BIGINT UNSIGNED NOT NULL,
   artist_id       BIGINT UNSIGNED NOT NULL,
@@ -656,9 +656,9 @@ CREATE TABLE comments (
   CONSTRAINT fk_comment_user FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT fk_comment_artist FOREIGN KEY (artist_id) REFERENCES artists (id) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT fk_comment_parent FOREIGN KEY (parent_id) REFERENCES comments (id) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Comentarios polimórficos';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Comentarios polimÃ³rficos';
 
-CREATE TABLE likes (
+CREATE TABLE IF NOT EXISTS likes (
   id              BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
   user_id         BIGINT UNSIGNED NOT NULL,
   artist_id       BIGINT UNSIGNED NOT NULL,
@@ -670,9 +670,9 @@ CREATE TABLE likes (
   KEY idx_likes_ref (reference_type, reference_id),
   CONSTRAINT fk_like_user FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT fk_like_artist FOREIGN KEY (artist_id) REFERENCES artists (id) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Me gusta polimórficos';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Me gusta polimÃ³rficos';
 
-CREATE TABLE follows (
+CREATE TABLE IF NOT EXISTS follows (
   id         BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
   user_id    BIGINT UNSIGNED NOT NULL,
   artist_id  BIGINT UNSIGNED NOT NULL,
@@ -684,7 +684,7 @@ CREATE TABLE follows (
   CONSTRAINT fk_follow_artist FOREIGN KEY (artist_id) REFERENCES artists (id) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Seguidores de artistas';
 
-CREATE TABLE newsletter_subscribers (
+CREATE TABLE IF NOT EXISTS newsletter_subscribers (
   id              BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
   artist_id       BIGINT UNSIGNED NOT NULL,
   email           VARCHAR(191) NOT NULL,
@@ -701,7 +701,7 @@ CREATE TABLE newsletter_subscribers (
   CONSTRAINT fk_news_artist FOREIGN KEY (artist_id) REFERENCES artists (id) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Suscriptores de newsletter';
 
-CREATE TABLE newsletter_campaigns (
+CREATE TABLE IF NOT EXISTS newsletter_campaigns (
   id             BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
   artist_id      BIGINT UNSIGNED NOT NULL,
   subject        VARCHAR(200) NOT NULL,
@@ -715,13 +715,13 @@ CREATE TABLE newsletter_campaigns (
   PRIMARY KEY (id),
   KEY idx_newsc_artist (artist_id),
   CONSTRAINT fk_newsc_artist FOREIGN KEY (artist_id) REFERENCES artists (id) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Campañas de newsletter';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='CampaÃ±as de newsletter';
 
 -- ============================================================
--- GRUPO 8 — NOTIFICACIONES Y LOGS
+-- GRUPO 8 â€” NOTIFICACIONES Y LOGS
 -- ============================================================
 
-CREATE TABLE notifications (
+CREATE TABLE IF NOT EXISTS notifications (
   id         BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
   user_id    BIGINT UNSIGNED NOT NULL,
   artist_id  BIGINT UNSIGNED NOT NULL,
@@ -739,7 +739,7 @@ CREATE TABLE notifications (
   CONSTRAINT fk_notif_artist FOREIGN KEY (artist_id) REFERENCES artists (id) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Notificaciones in-app';
 
-CREATE TABLE audit_logs (
+CREATE TABLE IF NOT EXISTS audit_logs (
   id              BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
   user_id         BIGINT UNSIGNED DEFAULT NULL,
   artist_id       BIGINT UNSIGNED DEFAULT NULL,
@@ -757,9 +757,9 @@ CREATE TABLE audit_logs (
   KEY idx_audit_user (user_id),
   CONSTRAINT fk_audit_user FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE SET NULL ON UPDATE CASCADE,
   CONSTRAINT fk_audit_artist FOREIGN KEY (artist_id) REFERENCES artists (id) ON DELETE SET NULL ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Traza de auditoría';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Traza de auditorÃ­a';
 
-CREATE TABLE error_logs (
+CREATE TABLE IF NOT EXISTS error_logs (
   id            BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
   level         ENUM('debug','info','warning','error','critical') NOT NULL DEFAULT 'error',
   message       VARCHAR(1000) NOT NULL,
@@ -770,13 +770,13 @@ CREATE TABLE error_logs (
   PRIMARY KEY (id),
   KEY idx_error_level (level),
   KEY idx_error_created (created_at)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Logs de errores de la aplicación';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Logs de errores de la aplicaciÃ³n';
 
 -- ============================================================
--- GRUPO 9 — ANALÍTICAS
+-- GRUPO 9 â€” ANALÃTICAS
 -- ============================================================
 
-CREATE TABLE page_views (
+CREATE TABLE IF NOT EXISTS page_views (
   id           BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
   artist_id    BIGINT UNSIGNED NOT NULL,
   user_id      BIGINT UNSIGNED DEFAULT NULL,
@@ -791,9 +791,9 @@ CREATE TABLE page_views (
   KEY idx_pv_session (session_id),
   CONSTRAINT fk_pv_artist FOREIGN KEY (artist_id) REFERENCES artists (id) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT fk_pv_user FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE SET NULL ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Vistas de página (alta cardinalidad)';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Vistas de pÃ¡gina (alta cardinalidad)';
 
-CREATE TABLE events_tracking (
+CREATE TABLE IF NOT EXISTS events_tracking (
   id            BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
   artist_id     BIGINT UNSIGNED NOT NULL,
   user_id       BIGINT UNSIGNED DEFAULT NULL,
@@ -804,9 +804,9 @@ CREATE TABLE events_tracking (
   KEY idx_et_artist_event (artist_id, event_name, created_at),
   CONSTRAINT fk_et_artist FOREIGN KEY (artist_id) REFERENCES artists (id) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT fk_et_user FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE SET NULL ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Eventos analíticos personalizados';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Eventos analÃ­ticos personalizados';
 
-CREATE TABLE song_plays (
+CREATE TABLE IF NOT EXISTS song_plays (
   id                       BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
   song_id                  BIGINT UNSIGNED NOT NULL,
   artist_id                BIGINT UNSIGNED NOT NULL,
@@ -840,39 +840,39 @@ ON DUPLICATE KEY UPDATE id=id;
 -- ============================================================
 -- DIAGRAMA DE RELACIONES (FK)
 -- ============================================================
--- users 1──┐
---          ├─< user_roles >── roles
---          ├─< user_roles >── artists (alcance del artista)
---          ├─< refresh_tokens
---          ├─< sessions
--- roles 1──< role_permissions >── permissions
+-- users 1â”€â”€â”
+--          â”œâ”€< user_roles >â”€â”€ roles
+--          â”œâ”€< user_roles >â”€â”€ artists (alcance del artista)
+--          â”œâ”€< refresh_tokens
+--          â”œâ”€< sessions
+-- roles 1â”€â”€< role_permissions >â”€â”€ permissions
 --
--- artists 1──< artist_social_links
--- artists 1──< artist_themes
--- artists 1──< artist_seo
--- artists 1──< artist_settings
--- artists 1──< artist_domains
--- artists 1──< songs, albums, videos, gallery_items, events,
+-- artists 1â”€â”€< artist_social_links
+-- artists 1â”€â”€< artist_themes
+-- artists 1â”€â”€< artist_seo
+-- artists 1â”€â”€< artist_settings
+-- artists 1â”€â”€< artist_domains
+-- artists 1â”€â”€< songs, albums, videos, gallery_items, events,
 --              tickets, product_categories, products, coupons,
 --              orders, posts, comments, likes, follows,
 --              newsletter_subscribers, newsletter_campaigns,
 --              notifications, page_views, events_tracking
--- artists 1──< user_roles (artist_id)
+-- artists 1â”€â”€< user_roles (artist_id)
 --
--- albums 1──< album_songs >── songs
--- songs  1──< song_streaming_links
--- songs  1──< song_tags
--- songs  1──< song_plays, likes, comments
--- events 1──< tickets
--- tickets 1──< ticket_purchases >── users
--- product_categories 1──< product_categories (parent_id, self)
--- product_categories 1──< products
--- products 1──< product_images, product_variants, order_items
--- coupons  1──< orders
--- orders   1──< order_items, order_shipping, payments
--- users    1──< orders, payments, comments, likes, follows,
+-- albums 1â”€â”€< album_songs >â”€â”€ songs
+-- songs  1â”€â”€< song_streaming_links
+-- songs  1â”€â”€< song_tags
+-- songs  1â”€â”€< song_plays, likes, comments
+-- events 1â”€â”€< tickets
+-- tickets 1â”€â”€< ticket_purchases >â”€â”€ users
+-- product_categories 1â”€â”€< product_categories (parent_id, self)
+-- product_categories 1â”€â”€< products
+-- products 1â”€â”€< product_images, product_variants, order_items
+-- coupons  1â”€â”€< orders
+-- orders   1â”€â”€< order_items, order_shipping, payments
+-- users    1â”€â”€< orders, payments, comments, likes, follows,
 --              ticket_purchases, notifications
--- posts    1──< post_tags, comments, likes
+-- posts    1â”€â”€< post_tags, comments, likes
 
 -- ============================================================
 -- LISTA DE FK CON ON DELETE / ON UPDATE
@@ -944,12 +944,12 @@ ON DUPLICATE KEY UPDATE id=id;
 -- song_plays.user_id              -> users.id            SET NULL / CASCADE
 
 -- ============================================================
--- NOTAS DE DISEÑO
+-- NOTAS DE DISEÃ‘O
 -- ============================================================
--- 1. Single-tenant: toda tabla de contenido posee artist_id como FK a artists (único artista: Cabaxx).
+-- 1. Single-tenant: toda tabla de contenido posee artist_id como FK a artists (Ãºnico artista: Cabaxx).
 -- 2. Soft delete: tablas de estado/entidad usan deleted_at (NULL = activo).
 -- 3. ENUM solo para valores estables (status, type, currency, etc.).
--- 4. Relaciones polimórficas (comments, likes) usan reference_type + reference_id.
--- 5. auditoría y analíticas usan JSON para flexibilidad sin esquema rígido.
--- 6. Single-tenant: toda tabla de contenido posee artist_id como FK a artists (único artista: Cabaxx).
+-- 4. Relaciones polimÃ³rficas (comments, likes) usan reference_type + reference_id.
+-- 5. auditorÃ­a y analÃ­ticas usan JSON para flexibilidad sin esquema rÃ­gido.
+-- 6. Single-tenant: toda tabla de contenido posee artist_id como FK a artists (Ãºnico artista: Cabaxx).
 -- 7. Soft delete: tablas de estado/entidad usan deleted_at (NULL = activo).

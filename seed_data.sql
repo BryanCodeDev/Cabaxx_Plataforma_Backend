@@ -1,50 +1,53 @@
 -- ============================================================
 -- SEED DATA — Cabaxx
--- Datos iniciales necesarios para arrancar la plataforma
+-- Datos iniciales necesarios para arrancar la plataforma.
+-- Idempotente: usa ON DUPLICATE KEY UPDATE / INSERT IGNORE.
 -- ============================================================
 
 -- ------------------------------------------------------------
 -- ROLES DEL SISTEMA
+-- (id fijos: 1=superadmin, 2=artist_admin, 3=user, 4=guest)
 -- ------------------------------------------------------------
 INSERT INTO roles (id, name, slug, description) VALUES
-  (1, 'Superadministrador', 'superadmin', 'Acceso total al sistema'),
+  (1, 'Superadministrador',     'superadmin',   'Acceso total al sistema'),
   (2, 'Administrador del artista', 'artist_admin', 'Administra al artista Cabaxx'),
-  (3, 'Usuario', 'user', 'Fan registrado en la plataforma'),
-  (4, 'Invitado', 'guest', 'Visitante sin cuenta')
+  (3, 'Usuario',                'user',         'Fan registrado en la plataforma'),
+  (4, 'Invitado',               'guest',        'Visitante sin cuenta')
 ON DUPLICATE KEY UPDATE name=VALUES(name), description=VALUES(description);
 
 -- ------------------------------------------------------------
 -- PERMISOS BASE
+-- (id fijos para que role_permissions referencie de forma estable)
 -- ------------------------------------------------------------
 INSERT INTO permissions (id, name, slug, module, description) VALUES
-  (1,  'Ver panel',                  'view_dashboard',        'dashboard',     'Acceso al panel de control'),
-  (2,  'Gestionar canciones',        'manage_songs',          'songs',         'CRUD de canciones'),
-  (3,  'Gestionar álbumes',          'manage_albums',         'albums',        'CRUD de álbumes'),
-  (4,  'Gestionar eventos',          'manage_events',         'events',        'CRUD de eventos y boletería'),
-  (5,  'Gestionar tienda',           'manage_store',          'store',         'CRUD de productos, categorías y cupones'),
-  (6,  'Gestionar pedidos',          'manage_orders',         'orders',        'Gestión de pedidos y pagos'),
-  (7,  'Gestionar videos',           'manage_videos',         'videos',        'CRUD de videos'),
-  (8,  'Gestionar galería',          'manage_gallery',        'gallery',       'CRUD de galería'),
-  (9,  'Gestionar publicaciones',    'manage_posts',          'posts',         'CRUD de posts y noticias'),
-  (10, 'Gestionar newsletter',       'manage_newsletter',     'newsletter',    'Suscriptores y campañas'),
-  (11, 'Ver analíticas',             'view_analytics',        'analytics',     'Métricas y analíticas'),
-  (12, 'Gestionar usuarios',         'manage_users',          'users',         'Gestión de usuarios y roles'),
-  (13, 'Configurar plataforma',      'manage_settings',       'settings',      'Configuración del artista y del sistema'),
-  (14, 'Comentar',                   'comment',               'community',     'Comentar en la comunidad'),
-  (15, 'Reaccionar',                 'react',                 'community',     'Likes y follows'),
-  (16, 'Comprar',                    'purchase',              'orders',        'Realizar pedidos y comprar boletas')
+  (1,  'Ver panel',                'view_dashboard',  'dashboard',  'Acceso al panel de control'),
+  (2,  'Gestionar canciones',      'manage_songs',    'songs',      'CRUD de canciones'),
+  (3,  'Gestionar álbumes',        'manage_albums',   'albums',     'CRUD de álbumes'),
+  (4,  'Gestionar eventos',        'manage_events',   'events',     'CRUD de eventos y boletería'),
+  (5,  'Gestionar tienda',         'manage_store',    'store',      'CRUD de productos, categorías y cupones'),
+  (6,  'Gestionar pedidos',        'manage_orders',   'orders',     'Gestión de pedidos y pagos'),
+  (7,  'Gestionar videos',         'manage_videos',   'videos',     'CRUD de videos'),
+  (8,  'Gestionar galería',        'manage_gallery',  'gallery',    'CRUD de galería'),
+  (9,  'Gestionar publicaciones',  'manage_posts',    'posts',      'CRUD de posts y noticias'),
+  (10, 'Gestionar newsletter',     'manage_newsletter','newsletter','Suscriptores y campañas'),
+  (11, 'Ver analíticas',           'view_analytics',  'analytics',  'Métricas y analíticas'),
+  (12, 'Gestionar usuarios',       'manage_users',    'users',      'Gestión de usuarios y roles'),
+  (13, 'Configurar plataforma',    'manage_settings', 'settings',   'Configuración del artista y del sistema'),
+  (14, 'Comentar',                 'comment',         'community',  'Comentar en la comunidad'),
+  (15, 'Reaccionar',               'react',           'community',  'Likes y follows'),
+  (16, 'Comprar',                  'purchase',        'orders',     'Realizar pedidos y comprar boletas')
 ON DUPLICATE KEY UPDATE name=VALUES(name), module=VALUES(module), description=VALUES(description);
 
 -- ------------------------------------------------------------
 -- PERMISOS POR ROL
 -- ------------------------------------------------------------
 -- superadmin: todos
-INSERT IGNORE INTO role_permissions (role_id, permission_id)
-  SELECT 1, id FROM permissions;
+INSERT IGNORE INTO role_permissions (role_id, permission_id) SELECT 1, id FROM permissions;
 
--- artist_admin: todo el contenido del artista
+-- artist_admin: gestión completa del artista (sin manage_users)
 INSERT IGNORE INTO role_permissions (role_id, permission_id)
-  SELECT 2, id FROM permissions WHERE slug IN (
+  SELECT 2, id FROM permissions
+  WHERE slug IN (
     'view_dashboard','manage_songs','manage_albums','manage_events','manage_store',
     'manage_orders','manage_videos','manage_gallery','manage_posts','manage_newsletter',
     'view_analytics','manage_settings'
@@ -57,7 +60,7 @@ INSERT IGNORE INTO role_permissions (role_id, permission_id)
 -- guest: ninguno (sólo lectura en rutas públicas)
 
 -- ------------------------------------------------------------
--- ARTISTA PRINCIPAL
+-- ARTISTA PRINCIPAL — Cabaxx
 -- ------------------------------------------------------------
 INSERT INTO artists (id, slug, stage_name, real_name, short_bio, bio, country, city, status)
 VALUES (
@@ -81,40 +84,62 @@ INSERT IGNORE INTO user_roles (user_id, role_id, artist_id)
 SELECT u.id, 2, 1 FROM users u WHERE u.email = 'admin@cabaxx.com';
 
 -- ------------------------------------------------------------
--- CONFIGURACIÓN POR DEFECTO DEL ARTISTA
+-- TEMA VISUAL DEL ARTISTA
+-- (Tabla: artist_themes; 1 fila por artista, UNIQUE(artist_id))
 -- ------------------------------------------------------------
-INSERT INTO artist_settings (artist_id, currency, timezone, locale, allow_tips, allow_preorders)
-VALUES (1, 'COP', 'America/Bogota', 'es_CO', 1, 1)
-ON DUPLICATE KEY UPDATE currency='COP', timezone='America/Bogota', locale='es_CO';
+INSERT INTO artist_themes (
+  artist_id, primary_color, secondary_color, accent_color, font_heading, font_body, dark_mode_default
+) VALUES (
+  1, '#0F0F0F', '#F5F5F5', '#E11D48', 'Inter', 'Inter', 1
+)
+ON DUPLICATE KEY UPDATE accent_color=VALUES(accent_color), dark_mode_default=VALUES(dark_mode_default);
 
-INSERT INTO artist_themes (artist_id, primary_color, accent_color, bg_color, text_color, font_heading, font_body)
-VALUES (1, '#0F0F0F', '#E11D48', '#0A0A0A', '#F5F5F5', 'Inter', 'Inter')
-ON DUPLICATE KEY UPDATE accent_color=VALUES(accent_color);
-
-INSERT INTO artist_seo (artist_id, site_title, meta_description, og_image_url, twitter_handle, default_locale)
-VALUES (
+-- ------------------------------------------------------------
+-- SEO DEL ARTISTA
+-- (Tabla: artist_seo; 1 fila por artista, UNIQUE(artist_id))
+-- ------------------------------------------------------------
+INSERT INTO artist_seo (
+  artist_id, meta_title, meta_description, og_image_url, robots
+) VALUES (
   1,
   'Cabaxx — Plataforma oficial',
   'Plataforma oficial de Cabaxx, artista urbano bogotano. Música, eventos, tienda y comunidad en un solo lugar, hecho en Bogotá D.C., Colombia.',
   '',
-  '@cabaxx',
-  'es_CO'
+  'index,follow'
 )
-ON DUPLICATE KEY UPDATE site_title=VALUES(site_title), default_locale='es_CO';
+ON DUPLICATE KEY UPDATE
+  meta_title=VALUES(meta_title),
+  meta_description=VALUES(meta_description),
+  robots=VALUES(robots);
+
+-- ------------------------------------------------------------
+-- CONFIGURACIÓN CLAVE-VALOR DEL ARTISTA
+-- (Tabla: artist_settings — UNIQUE(artist_id, `key`))
+-- ------------------------------------------------------------
+INSERT INTO artist_settings (artist_id, `key`, value, type) VALUES
+  (1, 'currency',       'COP',              'string'),
+  (1, 'timezone',       'America/Bogota',   'string'),
+  (1, 'locale',         'es_CO',            'string'),
+  (1, 'allow_tips',     'true',             'boolean'),
+  (1, 'allow_preorders','true',             'boolean'),
+  (1, 'plan',           'enterprise',       'string')
+ON DUPLICATE KEY UPDATE value=VALUES(value), type=VALUES(type);
 
 -- ------------------------------------------------------------
 -- CATEGORÍAS DE PRODUCTO INICIALES
+-- (Tabla: product_categories — UNIQUE(artist_id, slug))
 -- ------------------------------------------------------------
 INSERT INTO product_categories (id, artist_id, name, slug, description, sort_order) VALUES
-  (1, 1, 'Camisetas',  'camisetas',  'Camisetas y hoodies oficiales',  1),
-  (2, 1, 'Accesorios', 'accesorios', 'Cadenas, gorras y más',          2),
-  (3, 1, 'Vinilos',    'vinilos',    'Ediciones físicas en vinilo',    3),
-  (4, 1, 'CD / Cassette', 'cd-cassette', 'Ediciones físicas en CD y cassette', 4)
+  (1, 1, 'Camisetas',     'camisetas',     'Camisetas y hoodies oficiales',      1),
+  (2, 1, 'Accesorios',    'accesorios',    'Cadenas, gorras y más',              2),
+  (3, 1, 'Vinilos',       'vinilos',       'Ediciones físicas en vinilo',        3),
+  (4, 1, 'CD / Cassette', 'cd-cassette',   'Ediciones físicas en CD y cassette', 4)
 ON DUPLICATE KEY UPDATE name=VALUES(name), sort_order=VALUES(sort_order);
 
 -- ------------------------------------------------------------
 -- CUPÓN DE BIENVENIDA
+-- (Tabla: coupons — UNIQUE(artist_id, code); columnas: type, value, max_uses, expires_at, status)
 -- ------------------------------------------------------------
-INSERT INTO coupons (artist_id, code, description, discount_type, discount_value, max_uses, status, starts_at, expires_at)
-VALUES (1, 'BOGOTABIENVENIDA10', '10% de descuento en tu primera compra', 'percent', 10, NULL, 'active', NOW(), DATE_ADD(NOW(), INTERVAL 1 YEAR))
-ON DUPLICATE KEY UPDATE status='active', discount_value=VALUES(discount_value);
+INSERT INTO coupons (artist_id, code, type, value, min_purchase, max_uses, status, expires_at)
+VALUES (1, 'BOGOTABIENVENIDA10', 'percent', 10.00, 0.00, NULL, 'active', DATE_ADD(NOW(), INTERVAL 1 YEAR))
+ON DUPLICATE KEY UPDATE status='active', value=VALUES(value), expires_at=VALUES(expires_at);

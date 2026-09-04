@@ -120,6 +120,36 @@ function summarizeConn(cfg) {
   };
 }
 
+function describeEnv() {
+  const keys = [
+    'DATABASE_URL',
+    'MYSQL_URL',
+    'MYSQL_PUBLIC_URL',
+    'MYSQLDATABASE_URL',
+    'MYSQLHOST',
+    'MYSQL_HOST',
+    'MYSQLUSER',
+    'MYSQL_USER',
+    'MYSQLPASSWORD',
+    'MYSQL_PASSWORD',
+    'MYSQL_ROOT_PASSWORD',
+    'MYSQLPORT',
+    'MYSQL_PORT',
+    'MYSQLDATABASE',
+    'MYSQL_DATABASE',
+    'RAILWAY_PRIVATE_DOMAIN',
+    'DB_HOST',
+    'DB_PORT',
+    'DB_USER',
+    'DB_PASSWORD',
+    'DB_NAME',
+  ];
+  return keys.reduce((acc, k) => {
+    if (process.env[k]) acc[k] = '***';
+    return acc;
+  }, {});
+}
+
 async function connectWithRetry(cfg, { tries = 15, delayMs = 2000 } = {}) {
   let lastErr;
   for (let i = 1; i <= tries; i += 1) {
@@ -167,14 +197,30 @@ async function main() {
   const cfg = resolveConnection();
   const baseDir = __dirname;
 
+  console.log('[migrate] DB env keys present:', describeEnv());
   console.log('[migrate] DB target:', summarizeConn(cfg));
 
-  if (cfg.host === 'localhost' && !process.env.DB_HOST && !process.env.DATABASE_URL && !process.env.MYSQL_URL) {
+  const hasAnyReal =
+    process.env.DATABASE_URL ||
+    process.env.MYSQL_URL ||
+    process.env.MYSQLHOST ||
+    process.env.MYSQL_HOST ||
+    process.env.RAILWAY_PRIVATE_DOMAIN;
+
+  if (!hasAnyReal && cfg.host === 'localhost') {
     console.error(
-      '[migrate] FATAL: no database configuration found. ' +
-      'Set one of: DATABASE_URL, MYSQL_URL, or DB_HOST/DB_PORT/DB_USER/DB_PASSWORD/DB_NAME in your service environment.'
+      '[migrate] FATAL: no real database configuration found.\n' +
+        '  - If you are on Railway, link your MySQL service to this backend service (Service → Variables → "Add Reference" → pick the MySQL service), or\n' +
+        '  - Set DATABASE_URL=mysql://user:pass@host:3306/db on this service.'
     );
     process.exit(2);
+  }
+
+  if (cfg.host.endsWith('.railway.internal') && cfg.host !== process.env.RAILWAY_PRIVATE_DOMAIN) {
+    console.warn(
+      `[migrate] WARNING: host "${cfg.host}" looks like the *backend* service internal domain, not the MySQL one. ` +
+        'Set DATABASE_URL to mysql://root:<password>@<MYSQL_PRIVATE_DOMAIN>:3306/<db> on this service.'
+    );
   }
 
   await ensureDatabase(cfg);

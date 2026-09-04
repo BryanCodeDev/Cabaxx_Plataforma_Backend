@@ -41,11 +41,11 @@ const env = {
   isProduction: (process.env.NODE_ENV || 'development') === 'production',
 
   db: {
-    host: process.env.DB_HOST || process.env.MYSQLHOST || 'localhost',
-    port: Number(process.env.DB_PORT || process.env.MYSQLPORT) || 3306,
+    host: process.env.DB_HOST || process.env.MYSQLHOST || process.env.MYSQL_HOST || process.env.RAILWAY_PRIVATE_DOMAIN || 'localhost',
+    port: Number(process.env.DB_PORT || process.env.MYSQLPORT || process.env.MYSQL_PORT) || 3306,
     name: process.env.DB_NAME || process.env.MYSQLDATABASE || process.env.MYSQL_DATABASE || 'map_db',
-    user: process.env.DB_USER || process.env.MYSQLUSER || 'map_user',
-    password: process.env.DB_PASSWORD || process.env.MYSQLPASSWORD || '',
+    user: process.env.DB_USER || process.env.MYSQLUSER || process.env.MYSQL_USER || 'map_user',
+    password: process.env.DB_PASSWORD || process.env.MYSQLPASSWORD || process.env.MYSQL_PASSWORD || process.env.MYSQL_ROOT_PASSWORD || '',
     connectionLimit: Number(process.env.DB_CONNECTION_LIMIT) || 10,
     ssl: process.env.DB_SSL === 'true' || process.env.NODE_ENV === 'production',
   },

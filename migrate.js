@@ -37,14 +37,37 @@ function resolveConnection() {
     };
   }
 
-  if (process.env.MYSQLHOST && process.env.MYSQLUSER) {
+  const host =
+    process.env.MYSQLHOST ||
+    process.env.MYSQL_HOST ||
+    process.env.RAILWAY_PRIVATE_DOMAIN ||
+    process.env.DB_HOST;
+
+  const user =
+    process.env.MYSQLUSER ||
+    process.env.MYSQL_USER ||
+    process.env.DB_USER;
+
+  if (host && user) {
+    const useSsl =
+      process.env.DB_SSL === 'true' || process.env.NODE_ENV === 'production';
     return {
-      host: process.env.MYSQLHOST,
-      port: Number(process.env.MYSQLPORT) || 3306,
-      user: process.env.MYSQLUSER,
-      password: process.env.MYSQLPASSWORD || '',
-      database: process.env.MYSQLDATABASE || process.env.MYSQL_DATABASE || 'railway',
-      ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
+      host,
+      port: Number(process.env.MYSQLPORT || process.env.MYSQL_PORT || process.env.DB_PORT) || 3306,
+      user,
+      password:
+        process.env.MYSQLPASSWORD ||
+        process.env.MYSQL_PASSWORD ||
+        process.env.MYSQL_ROOT_PASSWORD ||
+        process.env.DB_PASSWORD ||
+        '',
+      database:
+        process.env.MYSQLDATABASE ||
+        process.env.MYSQL_DATABASE ||
+        process.env.MYSQL_DATABASE_NAME ||
+        process.env.DB_NAME ||
+        'railway',
+      ssl: useSsl ? { rejectUnauthorized: false } : false,
     };
   }
 

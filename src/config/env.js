@@ -41,11 +41,59 @@ const env = {
   isProduction: (process.env.NODE_ENV || 'development') === 'production',
 
   db: {
-    host: process.env.DB_HOST || process.env.MYSQLHOST || process.env.MYSQL_HOST || process.env.RAILWAY_PRIVATE_DOMAIN || 'localhost',
+    host: (() => {
+      const candidates = [
+        process.env.DB_HOST,
+        process.env.MYSQLHOST,
+        process.env.MYSQL_HOST,
+        process.env.MYSQL_URL ? new URL(process.env.MYSQL_URL).hostname : null,
+        process.env.DATABASE_URL ? new URL(process.env.DATABASE_URL).hostname : null,
+        process.env.RAILWAY_PRIVATE_DOMAIN,
+      ].filter(Boolean);
+      // Skip the backend's own private domain (would connect to itself).
+      return candidates.find((h) => h !== process.env.RAILWAY_PRIVATE_DOMAIN) || 'localhost';
+    })(),
     port: Number(process.env.DB_PORT || process.env.MYSQLPORT || process.env.MYSQL_PORT) || 3306,
-    name: process.env.DB_NAME || process.env.MYSQLDATABASE || process.env.MYSQL_DATABASE || 'map_db',
-    user: process.env.DB_USER || process.env.MYSQLUSER || process.env.MYSQL_USER || (process.env.RAILWAY_PRIVATE_DOMAIN ? 'root' : 'map_user'),
-    password: process.env.DB_PASSWORD || process.env.MYSQLPASSWORD || process.env.MYSQL_PASSWORD || process.env.MYSQL_ROOT_PASSWORD || '',
+    name: (() => {
+      const fromUrl = (u) => {
+        try { return u ? new URL(u).pathname.replace(/^\//, '') : null; } catch { return null; }
+      };
+      return (
+        process.env.DB_NAME ||
+        process.env.MYSQLDATABASE ||
+        process.env.MYSQL_DATABASE ||
+        fromUrl(process.env.MYSQL_URL) ||
+        fromUrl(process.env.DATABASE_URL) ||
+        'map_db'
+      );
+    })(),
+    user: (() => {
+      const fromUrl = (u) => {
+        try { return u ? decodeURIComponent(new URL(u).username) : null; } catch { return null; }
+      };
+      return (
+        process.env.DB_USER ||
+        process.env.MYSQLUSER ||
+        process.env.MYSQL_USER ||
+        fromUrl(process.env.MYSQL_URL) ||
+        fromUrl(process.env.DATABASE_URL) ||
+        (process.env.MYSQL_ROOT_PASSWORD ? 'root' : 'map_user')
+      );
+    })(),
+    password: (() => {
+      const fromUrl = (u) => {
+        try { return u ? decodeURIComponent(new URL(u).password) : null; } catch { return null; }
+      };
+      return (
+        process.env.DB_PASSWORD ||
+        process.env.MYSQLPASSWORD ||
+        process.env.MYSQL_PASSWORD ||
+        process.env.MYSQL_ROOT_PASSWORD ||
+        fromUrl(process.env.MYSQL_URL) ||
+        fromUrl(process.env.DATABASE_URL) ||
+        ''
+      );
+    })(),
     connectionLimit: Number(process.env.DB_CONNECTION_LIMIT) || 10,
     ssl: process.env.DB_SSL === 'true' || process.env.NODE_ENV === 'production',
   },

@@ -46,6 +46,7 @@ function resolveConnection() {
   const user =
     process.env.MYSQLUSER ||
     process.env.MYSQL_USER ||
+    (process.env.RAILWAY_PRIVATE_DOMAIN ? 'root' : null) ||
     process.env.DB_USER;
 
   if (host && user) {

@@ -29,6 +29,16 @@ app.use(loggerMiddleware);
 
 app.get('/health', (req, res) => res.json({ status: 'ok', env: env.nodeEnv, uptime: process.uptime() }));
 
+app.get('/', (req, res) => {
+  res.json({
+    name: 'Cabaxx API',
+    env: env.nodeEnv,
+    version: process.env.npm_package_version || '1.0.0',
+    docs: `${env.apiPrefix}/health`,
+    api: env.apiPrefix,
+  });
+});
+
 const ARTIST_SLUG = env.clientUrl && env.clientUrl.includes('cabitaxx') ? 'cabaxx' : 'cabaxx';
 
 app.get('/sitemap.xml', (req, res, next) => {

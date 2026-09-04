@@ -197,7 +197,8 @@ async function main() {
   const cfg = resolveConnection();
   const baseDir = __dirname;
 
-  console.log('[migrate] DB env keys present:', describeEnv());
+  const envDump = describeEnv();
+  console.log('[migrate] DB env keys present:', envDump);
   console.log('[migrate] DB target:', summarizeConn(cfg));
 
   const hasAnyReal =
@@ -207,11 +208,13 @@ async function main() {
     process.env.MYSQL_HOST ||
     process.env.RAILWAY_PRIVATE_DOMAIN;
 
-  if (!hasAnyReal && cfg.host === 'localhost') {
+  if (!hasAnyReal) {
     console.error(
-      '[migrate] FATAL: no real database configuration found.\n' +
-        '  - If you are on Railway, link your MySQL service to this backend service (Service → Variables → "Add Reference" → pick the MySQL service), or\n' +
-        '  - Set DATABASE_URL=mysql://user:pass@host:3306/db on this service.'
+      '[migrate] FATAL: no database configuration found.\n' +
+        '  Env keys seen (with values): ' +
+        JSON.stringify(envDump) +
+        '\n  - If you are on Railway, link your MySQL service to this backend service: Variables → "+ New Variable" → "Add Reference" → pick the MySQL service → choose MYSQL_URL.\n' +
+        '  - Or set DATABASE_URL=mysql://user:pass@host:3306/db on this service.'
     );
     process.exit(2);
   }

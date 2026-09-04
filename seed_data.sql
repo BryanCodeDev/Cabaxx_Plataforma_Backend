@@ -3,6 +3,12 @@
 -- Datos iniciales necesarios para arrancar la plataforma.
 -- Idempotente: usa ON DUPLICATE KEY UPDATE / INSERT IGNORE.
 -- ============================================================
+--
+-- CONTRASEÑA DE PRUEBA (todos los usuarios): Cabaxx2026@
+-- Hash bcrypt (cost 10) generado para esa contraseña.
+-- Si la cambias, regenera el hash con:
+--   node -e "console.log(require('bcrypt').hashSync('NuevaClave', 10))"
+-- ============================================================
 
 -- ------------------------------------------------------------
 -- ROLES DEL SISTEMA
@@ -77,11 +83,50 @@ VALUES (
 ON DUPLICATE KEY UPDATE stage_name=VALUES(stage_name), bio=VALUES(bio), status='active';
 
 -- ------------------------------------------------------------
--- ENLACE ADMIN -> ARTISTA
--- (El admin@cabaxx.com insertado por database.sql se vincula aquí)
+-- USUARIOS DE PRUEBA
+-- 1 usuario por cada rol. Todos con la contraseña "Cabaxx2026@"
+-- (hash bcrypt pre-generado con cost 10).
 -- ------------------------------------------------------------
+-- superadmin
+INSERT INTO users (name, email, password_hash, status) VALUES
+  ('Super Cabaxx',     'super@cabaxx.com',     '$2b$10$/9S4TqpXe1E9A3EmerdKTuJ1szei63mL8Azp5Vu4THkVZyr48NNS6', 'active')
+ON DUPLICATE KEY UPDATE password_hash=VALUES(password_hash), status='active', name=VALUES(name);
+
+-- artist_admin (administrador del artista Cabaxx)
+-- Si database.sql ya creó admin@cabaxx.com con un hash placeholder,
+-- ON DUPLICATE KEY UPDATE lo reemplaza por el hash real.
+INSERT INTO users (name, email, password_hash, status) VALUES
+  ('Cabaxx Admin',     'admin@cabaxx.com',     '$2b$10$/9S4TqpXe1E9A3EmerdKTuJ1szei63mL8Azp5Vu4THkVZyr48NNS6', 'active')
+ON DUPLICATE KEY UPDATE password_hash=VALUES(password_hash), status='active', name=VALUES(name);
+
+-- user (fan)
+INSERT INTO users (name, email, password_hash, status) VALUES
+  ('Fan Cabaxx',       'fan@cabaxx.com',       '$2b$10$/9S4TqpXe1E9A3EmerdKTuJ1szei63mL8Azp5Vu4THkVZyr48NNS6', 'active')
+ON DUPLICATE KEY UPDATE password_hash=VALUES(password_hash), status='active', name=VALUES(name);
+
+-- guest
+INSERT INTO users (name, email, password_hash, status) VALUES
+  ('Invitado Cabaxx',  'invitado@cabaxx.com',  '$2b$10$/9S4TqpXe1E9A3EmerdKTuJ1szei63mL8Azp5Vu4THkVZyr48NNS6', 'active')
+ON DUPLICATE KEY UPDATE password_hash=VALUES(password_hash), status='active', name=VALUES(name);
+
+-- ------------------------------------------------------------
+-- ASIGNACIÓN DE ROLES
+-- ------------------------------------------------------------
+-- superadmin (alcance global)
 INSERT IGNORE INTO user_roles (user_id, role_id, artist_id)
-SELECT u.id, 2, 1 FROM users u WHERE u.email = 'admin@cabaxx.com';
+SELECT id, 1, NULL FROM users WHERE email = 'super@cabaxx.com';
+
+-- admin del artista
+INSERT IGNORE INTO user_roles (user_id, role_id, artist_id)
+SELECT id, 2, 1 FROM users WHERE email = 'admin@cabaxx.com';
+
+-- fan asociado al artista
+INSERT IGNORE INTO user_roles (user_id, role_id, artist_id)
+SELECT id, 3, 1 FROM users WHERE email = 'fan@cabaxx.com';
+
+-- guest (sin alcance)
+INSERT IGNORE INTO user_roles (user_id, role_id, artist_id)
+SELECT id, 4, NULL FROM users WHERE email = 'invitado@cabaxx.com';
 
 -- ------------------------------------------------------------
 -- TEMA VISUAL DEL ARTISTA

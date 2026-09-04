@@ -4,13 +4,23 @@ const path = require('path');
 
 const { combine, timestamp, errors, json, colorize, printf } = winston.format;
 
+const stringifyMessage = (msg) => {
+  if (msg == null) return '';
+  if (typeof msg === 'string') return msg;
+  try {
+    return JSON.stringify(msg, Object.getOwnPropertyNames(msg), 2);
+  } catch (e) {
+    return String(msg);
+  }
+};
+
 const consoleFormat = combine(
   colorize({ all: false }),
   timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
   errors({ stack: true }),
   printf(({ level, message, timestamp: ts, label, stack }) => {
     const tag = label ? `[${label}] ` : '';
-    const body = stack || message;
+    const body = stack || stringifyMessage(message);
     return `${ts} ${level} ${tag}${body}`;
   }),
 );

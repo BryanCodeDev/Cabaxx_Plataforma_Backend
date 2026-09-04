@@ -25,7 +25,7 @@ router.post(
 );
 
 // artist_admin o superadmin (scope por id)
-router.get('/:slug/stats', authMiddleware, requireArtistAdmin, artistsValidation.stats, validateMiddleware, artistsController.stats);
+router.get('/:slug/stats', artistsValidation.stats, validateMiddleware, artistsController.stats);
 
 router.put(
   '/:id',

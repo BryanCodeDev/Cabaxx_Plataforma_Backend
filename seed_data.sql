@@ -188,3 +188,14 @@ ON DUPLICATE KEY UPDATE name=VALUES(name), sort_order=VALUES(sort_order);
 INSERT INTO coupons (artist_id, code, type, value, min_purchase, max_uses, status, expires_at)
 VALUES (1, 'BOGOTABIENVENIDA10', 'percent', 10.00, 0.00, NULL, 'active', DATE_ADD(NOW(), INTERVAL 1 YEAR))
 ON DUPLICATE KEY UPDATE status='active', value=VALUES(value), expires_at=VALUES(expires_at);
+
+-- ------------------------------------------------------------
+-- NOTA SOBRE LA GALERÍA
+-- La tabla gallery_items queda vacía intencionalmente.
+-- El frontend (src/pages/public/GalleryPage.jsx) detecta rows: []
+-- y muestra un fallback con los assets bundleados en el build
+-- (src/assets/gallery/* y src/assets/videos/*), evitando URLs
+-- stale con hashes de Vite que cambian en cada build.
+-- Para cargar contenido real, usa el panel admin:
+--   /admin/galeria → subir imágenes / videos (quedan en Cloudinary).
+-- ------------------------------------------------------------
